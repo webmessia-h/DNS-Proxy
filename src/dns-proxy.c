@@ -129,7 +129,7 @@ static int parse_domain_name(const char *packet, size_t packet_len,
 void handle_dns_request(struct dns_proxy *dns, void *data,
                         struct sockaddr *addr, uint16_t tx_id, char *dns_req,
                         size_t dns_req_len) {
-  // Assuming the DNS header is at the start of buf
+  // Assuming the DNS header is at the start of buffer (dns_req)
   dns_request *request = (dns_request *)dns_req;
 
   if (ntohs(request->q_count) == 0) {
@@ -151,7 +151,7 @@ void handle_dns_request(struct dns_proxy *dns, void *data,
 
   printf("Extracted domain: %s\n", domain);
   is_blacklisted(domain);
-  free(dns_req); // Free allocated buffer
+  free(dns_req);
   return;
 }
 
