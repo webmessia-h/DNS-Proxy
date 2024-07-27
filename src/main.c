@@ -1,10 +1,11 @@
-#include "../config.h"
+#include "../config.h" /* main configuration file */
 #include "../include/dns-proxy.h"
+
 int main(void) {
   struct ev_loop *loop = EV_DEFAULT;
   struct dns_proxy proxy;
-  dns_proxy_init(&proxy, loop, handle_dns_request, "8.8.8.8", 1234,
-                 BLACKLISTED_RESPONSE);
+  void *callback = handle_dns_request;
+  dns_proxy_init(&proxy, loop, callback, "8.8.8.8", 1234, BLACKLISTED_RESPONSE);
   return 0;
 }
 
