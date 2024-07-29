@@ -87,7 +87,7 @@ typedef struct {
 
 struct dns_server;
 
-typedef void (*callback)(struct dns_server *dns, void *data,
+typedef void (*callback)(struct dns_server *dns, void *data, HashMap *map,
                          struct sockaddr *addr, uint16_t tx_id, char *dns_req,
                          size_t dns_req_len);
 
@@ -109,12 +109,13 @@ typedef struct dns_server {
  * and user-defined data (response string in our case)
  */
 void dns_server_init(dns_server *dns, struct ev_loop *loop, callback cb,
-                     const char *listen_addr, int listen_port, void *data);
+                     const char *listen_addr, int listen_port, void *data,
+                     HashMap *map);
 
 /* Checks whether domain is in the blacklist and forwards upstream or returns
  * response defined in "../config.h"
  */
-void handle_dns_request(struct dns_server *dns, void *data,
+void handle_dns_request(struct dns_server *dns, void *data, HashMap *map,
                         struct sockaddr *addr, uint16_t tx_id, char *dns_req,
                         size_t dns_req_len);
 

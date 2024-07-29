@@ -1,3 +1,5 @@
+#ifndef HASH_H
+#define HASH_H
 #include "../include/config.h"
 #include <ctype.h>
 #include <stdio.h>
@@ -10,12 +12,12 @@ typedef struct Node {
 } Node;
 
 typedef struct {
-  Node *table[BLACKLIST_SIZE];
+  Node *table[32];
 } HashMap;
 
 unsigned long hash(const char *str);
 
-HashMap *createHashMap();
+HashMap *create_hash_map();
 
 void insert(HashMap *map, const char *key);
 
@@ -23,4 +25,5 @@ int compare(const char *s1, const char *s2);
 
 int search(HashMap *map, const char *key);
 
-void freeHashMap(HashMap *map);
+void free_hash_map(HashMap *map);
+#endif // HASH_H

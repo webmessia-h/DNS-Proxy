@@ -8,7 +8,7 @@ INCLUDE_DIR = include
 OBJ_DIR = obj
 
 # Source files
-SRCS = $(SRC_DIR)/dns-server.c $(SRC_DIR)/https-client.c $(SRC_DIR)/main.c $(SRC_DIR)/poller.c $(SRC_DIR)/config.c
+SRCS = $(SRC_DIR)/dns-server.c $(SRC_DIR)/https-client.c $(SRC_DIR)/hash.c $(SRC_DIR)/main.c $(SRC_DIR)/poller.c $(SRC_DIR)/config.c
 
 # Object files
 OBJS = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)

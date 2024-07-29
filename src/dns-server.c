@@ -75,11 +75,13 @@ static void observer_cb(struct ev_loop *loop, ev_io *obs, int revents) {
     return;
   }
   uint16_t tx_id = ntohs(*((uint16_t *)buffer));
-  dns->cb(dns, dns->cb_data, (struct sockaddr *)&raddr, tx_id, buffer, len);
+  dns->cb(dns, dns->cb_data, dns->map, (struct sockaddr *)&raddr, tx_id, buffer,
+          len);
 }
 
 void dns_server_init(dns_server *dns, struct ev_loop *loop, callback cb,
-                     const char *listen_addr, int listen_port, void *data) {
+                     const char *listen_addr, int listen_port, void *data,
+                     HashMap *map) {
   dns->loop = loop;
   dns->sockfd = init_socket(listen_addr, listen_port, &dns->addrlen);
   if (dns->sockfd < 0) {
@@ -88,16 +90,16 @@ void dns_server_init(dns_server *dns, struct ev_loop *loop, callback cb,
   }
   dns->cb = cb;
   dns->cb_data = data;
+  dns->map = map;
 
-  // TODO: research more to know what to do here
   ev_io_init(&dns->observer, observer_cb, dns->sockfd, EV_READ);
   dns->observer.data = dns;
   ev_io_start(dns->loop, &dns->observer);
 }
 
-static bool is_blacklisted(const char *domain, void *data) {
+static bool is_blacklisted(const char *domain, HashMap *map) {
   for (int i = 0; i < BLACKLIST_SIZE; i++) {
-    if (search(data, domain) == 1) {
+    if (search(map, domain) == 1) {
       return true;
     }
   }
@@ -154,12 +156,10 @@ static bool parse_domain_name(const char *dns_req, size_t dns_req_len,
   return true;
 }
 
-void handle_dns_request(struct dns_server *dns, void *data,
+void handle_dns_request(struct dns_server *dns, void *data, HashMap *map,
                         struct sockaddr *addr, uint16_t tx_id, char *dns_req,
                         size_t dns_req_len) {
   // Assuming the DNS header is at the start of buffer (dns_req)
-  static long long queries = 0;
-  queries++;
   dns_header *header = (dns_header *)dns_req;
 
   if (ntohs(header->qd_count) == 0) {
@@ -179,14 +179,15 @@ void handle_dns_request(struct dns_server *dns, void *data,
     return;
   }
 
-  if (is_blacklisted(domain, data)) {
-    printf("count: %lld\n", queries);
+  if (is_blacklisted(domain, map)) {
     header->rcode = 3;
     header->qr = 1; // This is the response
     header->ans_count = 0;
     dns_server_respond(dns, addr, dns_req, dns_req_len);
   } else {
-    // forward to http client and send to upstream resolver
+    // TODO forward to http client and send to upstream resolver
+    dns_server_respond(dns, addr, "not implemented yet",
+                       strlen("not implemented yet"));
     return;
   }
   return;
