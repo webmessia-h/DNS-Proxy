@@ -2,10 +2,10 @@
 #define CONFIG_H
 
 // Proxy adress
-const char adress[] = "8.8.8.8";
+const char adress[] = "127.0.0.1";
 
-// Proxy port, any value between 1024 and 65535
-const int port = 1234;
+// Proxy port
+const int port = 53;
 
 #define BLACKLIST_SIZE 3 // count of unwanted domains
 // List of unwanted domains
