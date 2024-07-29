@@ -1,7 +1,7 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-// #include <ares.h> // FIXME FORBIDDEN BY TASK
+#include "../include/hash.h"
 #include <arpa/inet.h>
 #include <errno.h>
 #include <ev.h>
@@ -98,7 +98,8 @@ typedef struct dns_server {
   callback cb;
   int sockfd;
   socklen_t addrlen;
-  ev_io watcher;
+  ev_io observer;
+  HashMap *map;
 } dns_server;
 
 /* Initialize proxy with:
@@ -120,9 +121,9 @@ void handle_dns_request(struct dns_server *dns, void *data,
 // Sends a DNS response 'buffer' of length 'buflen' to 'raddr'.
 void dns_server_respond(dns_server *dns, struct sockaddr *raddr, char *buffer,
                         size_t buflen);
-
+// Stops ev_io loop
 void dns_server_stop(dns_server *dns);
-
+// Closes socket file descriptor
 void dns_server_cleanup(dns_server *dns);
 
 #endif // SERVER_H

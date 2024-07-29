@@ -1,9 +1,6 @@
-# Compiler
 CC = gcc
-
-# Compiler flags
-CFLAGS = -Wall -Iinclude -v
-LDFLAGS = -lev
+CFLAGS = -Wall -I/path/to/libev/include
+LDFLAGS = -L/path/to/libev/lib -lev
 
 # Directories
 SRC_DIR = src
@@ -11,7 +8,7 @@ INCLUDE_DIR = include
 OBJ_DIR = obj
 
 # Source files
-SRCS = $(SRC_DIR)/dns-server.c $(SRC_DIR)/http-client.c $(SRC_DIR)/main.c $(SRC_DIR)/poller.c
+SRCS = $(SRC_DIR)/dns-server.c $(SRC_DIR)/https-client.c $(SRC_DIR)/main.c $(SRC_DIR)/poller.c $(SRC_DIR)/config.c
 
 # Object files
 OBJS = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
@@ -40,4 +37,3 @@ clean:
 
 # Phony targets
 .PHONY: all clean
-

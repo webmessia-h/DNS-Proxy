@@ -1,16 +1,15 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+// Upstream DNS resolver adress
+extern const char *upstreamDNS;
 // Proxy adress
-const char adress[] = "127.0.0.1";
-
+extern const char *address;
 // Proxy port
-const int port = 53;
-
+extern const int port;
 #define BLACKLIST_SIZE 3 // count of unwanted domains
 // List of unwanted domains
-const char *BLACKLIST[BLACKLIST_SIZE] = {"somebadsite.com", "microsoft.com",
-                                         ""};
+extern const char *BLACKLIST[BLACKLIST_SIZE];
 // Response if accessed unwanted domain
 #define BLACKLISTED_RESPONSE "no bad domains today buddy"
 
