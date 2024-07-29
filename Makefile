@@ -11,7 +11,7 @@ INCLUDE_DIR = include
 OBJ_DIR = obj
 
 # Source files
-SRCS = $(SRC_DIR)/dns-proxy.c $(SRC_DIR)/main.c $(SRC_DIR)/poller.c
+SRCS = $(SRC_DIR)/dns-server.c $(SRC_DIR)/http-client.c $(SRC_DIR)/main.c $(SRC_DIR)/poller.c
 
 # Object files
 OBJS = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
