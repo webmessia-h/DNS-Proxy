@@ -40,23 +40,23 @@ typedef enum opcodes {
 
 // Rcodes
 typedef enum response_codes {
-#define DNS_RCODE_NOERROR = 0,
-#define DNS_RCODE_FORMERR = 1,
-#define DNS_RCODE_SERVFAIL = 2,
-#define DNS_RCODE_NXDOMAIN = 3,
-#define DNS_RCODE_NOTIMP = 4,
-#define DNS_RCODE_REFUSED = 5
+  DNS_RCODE_NOERROR = 0,
+  DNS_RCODE_FORMERR = 1,
+  DNS_RCODE_SERVFAIL = 2,
+  DNS_RCODE_NXDOMAIN = 3,
+  DNS_RCODE_NOTIMP = 4,
+  DNS_RCODE_REFUSED = 5
 } response_codes;
 
 typedef enum DNS_types {
-#define DNS_TYPE_A = 1,
-#define DNS_TYPE_NS = 2,
-#define DNS_TYPE_CNAME = 5,
-#define DNS_TYPE_SOA = 6,
-#define DNS_TYPE_PTR = 12,
-#define DNS_TYPE_MX = 15,
-#define DNS_TYPE_TXT = 16,
-#define DNS_TYPE_AAAA = 28
+  DNS_TYPE_A = 1,
+  DNS_TYPE_NS = 2,
+  DNS_TYPE_CNAME = 5,
+  DNS_TYPE_SOA = 6,
+  DNS_TYPE_PTR = 12,
+  DNS_TYPE_MX = 15,
+  DNS_TYPE_TXT = 16,
+  DNS_TYPE_AAAA = 28
 } DNS_types;
 
 /* DNS packet
