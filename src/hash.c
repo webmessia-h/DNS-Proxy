@@ -1,7 +1,6 @@
 #include "../include/hash.h"
 #include <stdio.h>
 
-// djb2 hash function
 unsigned long hash(const char *str) {
   unsigned long hash = 5381;
   int c;
@@ -10,7 +9,7 @@ unsigned long hash(const char *str) {
     hash = ((hash << 5) + hash) + tolower(c); // hash * 33 + c
   }
 
-  return hash % BLACKLIST_SIZE;
+  return hash % BLACKLISTED_DOMAINS;
 }
 
 HashMap *create_hash_map() {
@@ -59,7 +58,7 @@ int search(HashMap *map, const char *key) {
 }
 
 void free_hash_map(HashMap *map) {
-  for (int i = 0; i < BLACKLIST_SIZE; i++) {
+  for (int i = 0; i < BLACKLISTED_DOMAINS; i++) {
     Node *current = map->table[i];
     while (current != NULL) {
       Node *temp = current;

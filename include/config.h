@@ -1,17 +1,22 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-// Upstream DNS resolver adress
-extern const char *upstreamDNS;
-// Proxy adress
-extern const char *address;
-// Proxy port
-extern const int port;
-#define BLACKLIST_SIZE 3 // count of unwanted domains
-// List of unwanted domains
-extern const char *BLACKLIST[BLACKLIST_SIZE];
-// Response if accessed unwanted domain
-#define BLACKLISTED_RESPONSE "no bad domains today buddy"
+#include <stdint.h>
+
+#define BLACKLISTED_DOMAINS 3
+extern char *BLACKLIST[BLACKLISTED_DOMAINS];
+#define RESOLVERS 3
+extern char *upstream_resolver[RESOLVERS];
+
+struct Options {
+  const char *listen_addr;
+  uint16_t listen_port;
+  // Blacklist must contain strings in format "example.com"
+  int BLACKLISTED_RESPONSE;
+};
+typedef struct Options options;
+
+void options_init(struct Options *opt);
 
 #define BUFFER_SIZE /*desired buffer size*/
 

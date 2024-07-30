@@ -1,6 +1,6 @@
 CC = gcc
-CFLAGS = -Wall -I/path/to/libev/include
-LDFLAGS = -L/path/to/libev/lib -lev
+CFLAGS = -Wall
+LDFLAGS =  -lev -lcurl
 
 # Directories
 SRC_DIR = src

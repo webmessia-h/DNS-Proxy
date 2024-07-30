@@ -13,48 +13,51 @@
 #include <unistd.h>
 
 enum {
-  REQUEST_MAX = 1500 /* A default MTU */
+  REQUEST_MAX = 1500,
+  MAX_DOMAIN_LENGTH = 253,
+  DNS_HEADER_SIZE = 12,
+  DNS_CLASS_IN = 1
 };
 
 // DNS header flags
-#define DNS_FLAG_QR 0x8000
-#define DNS_FLAG_OPCODE 0x7800
-#define DNS_FLAG_AA 0x0400
-#define DNS_FLAG_TC 0x0200
-#define DNS_FLAG_RD 0x0100
-#define DNS_FLAG_RA 0x0080
-#define DNS_FLAG_Z 0x0070
-#define DNS_FLAG_RCODE 0x000F
+typedef enum header_flags {
+  DNS_FLAG_QR = 0x8000,
+  DNS_FLAG_OPCODE = 0x7800,
+  DNS_FLAG_AA = 0x0400,
+  DNS_FLAG_TC = 0x0200,
+  DNS_FLAG_RD = 0x0100,
+  DNS_FLAG_RA = 0x0080,
+  DNS_FLAG_Z = 0x0070,
+  DNS_FLAG_RCODE = 0x000F
+} header_flags;
 
-// DNS opcodes
-#define DNS_OPCODE_QUERY 0
-#define DNS_OPCODE_IQUERY 1
-#define DNS_OPCODE_STATUS 2
+// Opcodes
+typedef enum opcodes {
+  DNS_OPCODE_QUERY = 0,
+  DNS_OPCODE_IQUERY = 1,
+  DNS_OPCODE_STATUS = 2
+} opcodes;
 
-// DNS response codes
-#define DNS_RCODE_NOERROR 0
-#define DNS_RCODE_FORMERR 1
-#define DNS_RCODE_SERVFAIL 2
-#define DNS_RCODE_NXDOMAIN 3
-#define DNS_RCODE_NOTIMP 4
-#define DNS_RCODE_REFUSED 5
+// Rcodes
+typedef enum response_codes {
+#define DNS_RCODE_NOERROR = 0,
+#define DNS_RCODE_FORMERR = 1,
+#define DNS_RCODE_SERVFAIL = 2,
+#define DNS_RCODE_NXDOMAIN = 3,
+#define DNS_RCODE_NOTIMP = 4,
+#define DNS_RCODE_REFUSED = 5
+} response_codes;
 
-// DNS types
-#define DNS_TYPE_A 1
-#define DNS_TYPE_NS 2
-#define DNS_TYPE_CNAME 5
-#define DNS_TYPE_SOA 6
-#define DNS_TYPE_PTR 12
-#define DNS_TYPE_MX 15
-#define DNS_TYPE_TXT 16
-#define DNS_TYPE_AAAA 28
-
-// DNS classes
-#define DNS_CLASS_IN 1
-
-// DNS sizes
-#define MAX_DOMAIN_LENGTH 253
-#define DNS_HEADER_SIZE 12
+typedef enum DNS_types {
+#define DNS_TYPE_A = 1,
+#define DNS_TYPE_NS = 2,
+#define DNS_TYPE_CNAME = 5,
+#define DNS_TYPE_SOA = 6,
+#define DNS_TYPE_PTR = 12,
+#define DNS_TYPE_MX = 15,
+#define DNS_TYPE_TXT = 16,
+#define DNS_TYPE_AAAA = 28
+} DNS_types;
 
 /* DNS packet
  * pragma directives to ensure consequent alignment of data
@@ -91,7 +94,6 @@ typedef void (*callback)(struct dns_server *dns, void *data, HashMap *map,
                          struct sockaddr *addr, uint16_t tx_id, char *dns_req,
                          size_t dns_req_len);
 
-// TODO: add wtf else is needed here
 typedef struct dns_server {
   struct ev_loop *loop;
   void *cb_data;

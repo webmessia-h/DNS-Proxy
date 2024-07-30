@@ -98,7 +98,7 @@ void dns_server_init(dns_server *dns, struct ev_loop *loop, callback cb,
 }
 
 static bool is_blacklisted(const char *domain, HashMap *map) {
-  for (int i = 0; i < BLACKLIST_SIZE; i++) {
+  for (int i = 0; i < BLACKLISTED_DOMAINS; i++) {
     if (search(map, domain) == 1) {
       return true;
     }
@@ -180,17 +180,19 @@ void handle_dns_request(struct dns_server *dns, void *data, HashMap *map,
   }
 
   if (is_blacklisted(domain, map)) {
-    header->rcode = 3;
+    header->rcode = *(uint8_t *)data;
     header->qr = 1; // This is the response
     header->ans_count = 0;
     dns_server_respond(dns, addr, dns_req, dns_req_len);
+    free(dns_req);
+    return;
   } else {
-    // TODO forward to http client and send to upstream resolver
+    // TODO forward to https client and send to upstream resolver
     dns_server_respond(dns, addr, "not implemented yet",
                        strlen("not implemented yet"));
+    free(dns_req);
     return;
   }
-  return;
 }
 
 void dns_server_respond(dns_server *dns, struct sockaddr *raddr, char *buffer,
