@@ -4,9 +4,16 @@
 #include <stdint.h>
 
 #define BLACKLISTED_DOMAINS 3
-extern char *BLACKLIST[BLACKLISTED_DOMAINS];
+extern const char *blacklist[BLACKLISTED_DOMAINS];
 #define RESOLVERS 3
-extern char *upstream_resolver[RESOLVERS];
+extern const char *upstream_resolver[RESOLVERS];
+
+enum {
+  REQUEST_MAX = 1500,
+  MAX_DOMAIN_LENGTH = 253,
+  DNS_HEADER_SIZE = 12,
+  DNS_CLASS_IN = 1
+};
 
 struct Options {
   const char *listen_addr;

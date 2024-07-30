@@ -21,7 +21,7 @@ static HashMap *blacklist_hashmap(HashMap *map) {
     return NULL;
   }
   for (int i = 0; i < BLACKLISTED_DOMAINS; i++) {
-    insert(map, BLACKLIST[i]);
+    insert(map, blacklist[i]);
   }
   return map;
 }
@@ -29,8 +29,8 @@ static HashMap *blacklist_hashmap(HashMap *map) {
 int main(void) {
 
   loop = EV_DEFAULT;
-  HashMap *map = create_hash_map();
   options_init(&opts);
+  HashMap *map = create_hash_map();
 
   blacklist_hashmap(map);
   if (map == NULL) {

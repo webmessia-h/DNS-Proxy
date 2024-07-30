@@ -1,43 +1,36 @@
-import threading
 import time
-from concurrent.futures import ThreadPoolExecutor
+from threading import Timer
 
 import dns.resolver
 
 
-def send_dns_query(resolver, domain):
+def send_query(resolver, domain):
     try:
-        resolver.resolve(domain, 'A')
+        resolver.query(domain)
     except Exception as e:
-        print(f"Query failed: {e}")
+        print(f"Query failed for {domain}: {e}")
 
 
 def load_test(target_ip, target_port, queries_per_second, duration, domains):
-    resolver = dns.resolver.Resolver(configure=False)
+    resolver = dns.resolver.Resolver()
     resolver.nameservers = [target_ip]
     resolver.port = target_port
 
+    interval = 1.0 / queries_per_second
     end_time = time.time() + duration
 
-    with ThreadPoolExecutor(max_workers=100) as executor:
-        while time.time() < end_time:
-            start = time.time()
-            futures = []
-            for _ in range(queries_per_second):
-                for domain in domains:
-                    futures.append(executor.submit(send_dns_query, resolver, domain))
+    def perform_queries():
+        if time.time() < end_time:
+            for domain in domains:
+                send_query(resolver, domain)
+            Timer(interval, perform_queries).start()
 
-            for future in futures:
-                future.result()
-
-            elapsed = time.time() - start
-            if elapsed < 1:
-                time.sleep(1 - elapsed)
+    perform_queries()
 
 
 if __name__ == "__main__":
-    target_ip = "127.0.0.1"  # Replace with your proxy's IP
-    target_port = 53  # Replace with your proxy's port
+    target_ip = "127.0.0.1"
+    target_port = 53
     queries_per_second = 10000
     duration = 60  # seconds
     domains = [

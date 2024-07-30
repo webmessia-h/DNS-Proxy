@@ -1,6 +1,5 @@
 #include "../include/dns-client.h"
 #include <fcntl.h>
-#include <sys/types.h>
 
 static void handle_resolver_read(struct ev_loop *loop, ev_io *watcher,
                                  int revents) {
@@ -8,24 +7,34 @@ static void handle_resolver_read(struct ev_loop *loop, ev_io *watcher,
     return;
 
   dns_client *client = (dns_client *)watcher->data;
-  char buffer[REQUEST_MAX];
-  struct sockaddr_storage src_addr;
-  socklen_t src_addrlen = sizeof(src_addr);
+  char *buffer = (char *)calloc(1, REQUEST_MAX + 1);
+  if (buffer == NULL) {
+    fprintf(stderr, "Failed buffer allocation\n");
+    return;
+  }
+  struct sockaddr_storage saddr;
+  socklen_t src_addrlen = sizeof(saddr);
 
-  ssize_t received = recvfrom(watcher->fd, buffer, sizeof(buffer), 0,
-                              (struct sockaddr *)&src_addr, &src_addrlen);
+  ssize_t len = recvfrom(watcher->fd, buffer, sizeof(buffer), 0,
+                         (struct sockaddr *)&saddr, &src_addrlen);
 
-  if (received < 0) {
-    perror("Error receiving DNS response");
+  if (len < 0) {
+    fprintf(stderr, "Recvfrom failed: %s\n", strerror(errno));
+    free(buffer);
+    return;
+  }
+  if (len < (int)sizeof(uint16_t)) {
+    fprintf(stderr, "Malformed response received (too short)\n");
+    free(buffer);
     return;
   }
 
-  if (client->cb) {
-    client->cb(client->cb_data, buffer, received);
-  }
+  uint16_t tx_id = ntohs(*((uint16_t *)buffer));
+
+  client->cb(client->cb_data, buffer, len, tx_id);
 }
 
-void dns_client_init(dns_client *client, struct ev_loop *loop, response_cb cb,
+void dns_client_init(dns_client *client, struct ev_loop *loop, res_callback cb,
                      void *data, HashMap *map) {
   client->loop = loop;
   client->cb = cb;
@@ -59,17 +68,17 @@ void dns_client_init(dns_client *client, struct ev_loop *loop, response_cb cb,
 
     freeaddrinfo(res);
 
-    ev_io_init(&client->resolvers[i].read_observer, handle_resolver_read,
+    ev_io_init(&client->resolvers[i].observer, handle_resolver_read,
                client->resolvers[i].socket, EV_READ);
-    client->resolvers[i].read_observer.data = client;
-    ev_io_start(client->loop, &client->resolvers[i].read_observer);
+    client->resolvers[i].observer.data = client;
+    ev_io_start(client->loop, &client->resolvers[i].observer);
   }
 
   return;
 }
 
 void dns_client_send_request(dns_client *client, const char *dns_req,
-                             size_t req_len) {
+                             size_t req_len, uint16_t tx_id) {
   if (sizeof(upstream_resolver) == 0)
     return;
 
@@ -83,7 +92,7 @@ void dns_client_send_request(dns_client *client, const char *dns_req,
                         (struct sockaddr *)&res->addr, res->addrlen);
 
   if (sent < 0) {
-    perror("Error sending DNS request");
+    printf("sendto client failed: %s", strerror(errno));
     return;
   }
 
@@ -92,7 +101,7 @@ void dns_client_send_request(dns_client *client, const char *dns_req,
 
 void dns_client_cleanup(dns_client *client) {
   for (int i = 0; i < RESOLVERS; i++) {
-    ev_io_stop(client->loop, &client->resolvers[i].read_observer);
+    ev_io_stop(client->loop, &client->resolvers[i].observer);
     close(client->resolvers[i].socket);
   }
 }
