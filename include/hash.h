@@ -4,16 +4,18 @@
 #include "include.h"
 #include "uthash.h"
 
-typedef struct transaction_info {
-  uint16_t original_tx_id;
-  struct sockaddr *client_addr;
-  socklen_t client_addr_len;
-} transaction_info;
-
 typedef struct {
   char *key;
   UT_hash_handle hh; // makes this structure hashable
 } HashEntry;
+
+#pragma pack(push, 1)
+typedef struct transaction_info {
+  uint16_t original_tx_id;
+  struct sockaddr client_addr;
+  socklen_t client_addr_len;
+} transaction_info;
+#pragma pack(pop)
 
 typedef struct {
   uint16_t key;
@@ -21,8 +23,8 @@ typedef struct {
   UT_hash_handle hh; // makes this structure hashable
 } TransactionHashEntry;
 
-HashEntry *blacklist = NULL;
-TransactionHashEntry *transactions = NULL;
+extern HashEntry *blacklist;
+extern TransactionHashEntry *transactions;
 
 void add_blacklist_entry(const char *key);
 int find(const char *key);

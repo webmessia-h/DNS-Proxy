@@ -1,8 +1,8 @@
 #ifndef DNS_CLIENT
 #define DNS_CLIENT
 
-#include "../include/hash.h"
 #include "config.h"
+#include "hash.h"
 #include "include.h"
 #include <sys/socket.h>
 

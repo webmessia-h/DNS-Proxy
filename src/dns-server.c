@@ -104,6 +104,7 @@ bool is_blacklisted(const char *domain) {
   return false;
 }
 
+// TODO :  return a pointer to question start so we can redirect
 bool parse_domain_name(const char *dns_req, size_t dns_req_len, size_t offset,
                        char *domain, size_t domain_max_len) {
   size_t pos = offset;

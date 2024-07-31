@@ -13,7 +13,7 @@ static void client_receive_response(struct ev_loop *loop, ev_io *obs,
   struct sockaddr_storage saddr;
   socklen_t src_addrlen = sizeof(saddr);
 
-  ssize_t len = recvfrom(obs->fd, buffer, sizeof(buffer), 0,
+  ssize_t len = recvfrom(obs->fd, buffer, REQUEST_MAX, 0,
                          (struct sockaddr *)&saddr, &src_addrlen);
 
   if (len < 0) {
@@ -32,8 +32,7 @@ static void client_receive_response(struct ev_loop *loop, ev_io *obs,
 }
 
 void client_init(dns_client *client, struct ev_loop *loop, res_callback cb,
-                 void *data,
-                 TransactionHashEntry __attribute__((unused)) * transactions) {
+                 void *data, TransactionHashEntry *transactions) {
   client->loop = loop;
   client->cb = cb;
   client->cb_data = data;

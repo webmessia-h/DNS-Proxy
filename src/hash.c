@@ -1,4 +1,5 @@
 #include "../include/hash.h"
+
 void add_blacklist_entry(const char *key) {
   HashEntry *entry = malloc(sizeof(HashEntry));
   if (entry) {
@@ -41,8 +42,9 @@ void delete_transaction(uint16_t tx_id) {
   TransactionHashEntry *entry;
   HASH_FIND(hh, transactions, &tx_id, sizeof(uint16_t), entry);
   if (entry) {
+    free(entry->value); // Free the transaction_info struct
     HASH_DEL(transactions, entry);
-    free(entry);
+    free(entry); // Free the hash entry
   }
 }
 

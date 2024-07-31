@@ -1,7 +1,4 @@
 #include "../include/dns-proxy.h"
-#include <netinet/in.h>
-#include <stdint.h>
-#include <sys/socket.h>
 
 static void proxy_process_request(dns_server *srv, void *cb_data,
                                   struct sockaddr *addr, uint16_t tx_id,
@@ -13,6 +10,7 @@ static void proxy_process_response(void *data, struct sockaddr *addr,
 
 static void proxy_handle_timeout(EV_P_ ev_timer *w, int revents);
 
+// outline of a timeout function (unused)
 static void proxy_start(dns_proxy *prx) {
   ev_timer_init(&prx->client->timeout_observer, proxy_handle_timeout, 0,
                 prx->timeout_ms / 1000.0);
@@ -32,7 +30,6 @@ void proxy_init(dns_proxy *prx, dns_client *clt, dns_server *srv,
 
   clt->cb = proxy_process_response;
   clt->cb_data = prx;
-  // proxy_start(prx);
 }
 
 void proxy_stop(dns_proxy *prx) { ev_break(prx->loop, EVBREAK_ALL); }
@@ -60,20 +57,24 @@ void proxy_handle_request(struct dns_proxy *prx, struct sockaddr *addr,
   }
 
   if (is_blacklisted(domain)) {
-    header->opcode = DNS_OPCODE_QUERY;
+#if REDIRECT == 1
+    // TODO : implement redirection
+#else
     header->rcode = *(uint8_t *)prx->server->cb_data;
     header->qr = 1; // This is the response
-    header->ans_count = 0;
+    header->rd = 0; // Not recursion desired
     server_send_response(prx->server, addr, dns_req, dns_req_len);
     free(dns_req);
     return;
+#endif
   } else {
     /* @brief
-     * Create a hashmap with transaction_info struct's
-     * in order to determine receiver-client later
+     *  insert transaction_info into hashmap in order to know endpoint receiver
      */
-    struct transaction_info *tx_info; /* move to main */
-    tx_info->client_addr = addr;
+    struct transaction_info *tx_info = malloc(
+        sizeof(struct transaction_info)); /* will be freed upon deletion of
+                                             entry in proxy_handle_respose */
+    tx_info->client_addr = *addr;
     tx_info->original_tx_id = tx_id;
     tx_info->client_addr_len = sizeof(*addr);
     add_transaction_entry(tx_info);
@@ -94,8 +95,8 @@ void proxy_handle_response(dns_proxy *prx, struct sockaddr *addr, char *dns_res,
     return;
   }
   transaction_info *current = find_transaction(tx_id);
-  server_send_response(prx->server, current->client_addr, dns_res,
-                       response_size);
+  server_send_response(prx->server, (struct sockaddr *)&current->client_addr,
+                       dns_res, response_size);
   delete_transaction(tx_id);
 }
 
