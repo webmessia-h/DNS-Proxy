@@ -80,12 +80,12 @@ TransactionHashMap *create_transaction_hash_map() {
   return map;
 }
 
-void insert_transaction(TransactionHashMap *map, const transaction_info *tx) {
-  unsigned long index = hash_uint16(tx->original_tx_id);
+void insert_transaction(TransactionHashMap *map, const transaction_info tx) {
+  unsigned long index = hash_uint16(tx.original_tx_id);
   TransactionNode *newNode = malloc(sizeof(TransactionNode));
   if (newNode) {
-    newNode->key = tx->original_tx_id;
-    newNode->value = *tx;
+    newNode->key = tx.original_tx_id;
+    newNode->value = tx;
     newNode->next = map->table[index];
     map->table[index] = newNode;
   }

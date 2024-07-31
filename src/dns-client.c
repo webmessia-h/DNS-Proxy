@@ -32,11 +32,11 @@ static void client_receive_response(struct ev_loop *loop, ev_io *obs,
 }
 
 void client_init(dns_client *client, struct ev_loop *loop, res_callback cb,
-                 void *data, HashMap *map) {
+                 void *data, HashMap __attribute__((unused)) * map) {
   client->loop = loop;
   client->cb = cb;
   client->cb_data = data;
-  client->transactions = map;
+  client->transactions = create_transaction_hash_map();
 
   for (int i = 0; i < RESOLVERS; i++) {
     struct addrinfo hints, *res;

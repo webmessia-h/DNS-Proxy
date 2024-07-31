@@ -1,4 +1,5 @@
 #include "../include/dns-proxy.h"
+#include <netinet/in.h>
 #include <stdint.h>
 #include <sys/socket.h>
 
@@ -67,21 +68,37 @@ void proxy_handle_request(struct dns_proxy *prx, struct sockaddr *addr,
     free(dns_req);
     return;
   } else {
-    struct transaction_info tx_inf;
-    tx_inf.client_addr = (struct sockaddr_storage *)&addr;
-    tx_inf.original_tx_id = tx_id;
-    tx_inf.client_addr_len = sizeof(*addr);
-    insert_transaction(prx->client->transactions, &tx_inf);
+    /* @brief
+     * Create a hashmap with transaction_info struct's
+     * in order to determine receiver-client later
+     */
+    struct transaction_info tx_info;
+    tx_info.client_addr = addr;
+    tx_info.original_tx_id = tx_id;
+    tx_info.client_addr_len = sizeof(*addr);
+    insert_transaction(prx->client->transactions, tx_info);
     client_send_request(prx->client, dns_req, dns_req_len, tx_id);
     free(dns_req);
     return;
   }
 }
 
-void proxy_handle_response(dns_proxy *prx, struct sockaddr *addr,
-                           char *response, size_t response_size,
-                           uint16_t tx_id) {
-  server_send_response(prx->server, addr, response, response_size);
+void proxy_handle_response(dns_proxy *prx, struct sockaddr *addr, char *dns_res,
+                           size_t response_size, uint16_t tx_id) {
+  // Assuming the DNS header is at the start of buffer (dns_req)
+  dns_header *header = (dns_header *)dns_res;
+
+  if (ntohs(header->qd_count) == 0) {
+    fprintf(stderr, "No questions in the request. id:%d\n", tx_id);
+    free(dns_res);
+    return;
+  }
+
+  transaction_info *current =
+      search_transaction(prx->client->transactions, header->id);
+
+  server_send_response(prx->server, current->client_addr, dns_res,
+                       response_size);
 }
 
 static void proxy_process_request(dns_server *srv, void *cb_data, HashMap *map,

@@ -19,9 +19,10 @@ typedef struct {
 } HashMap;
 
 // Transaction info struct
+#pragma pack(push, 1)
 typedef struct transaction_info {
   uint16_t original_tx_id;
-  struct sockaddr_storage *client_addr;
+  struct sockaddr *client_addr;
   socklen_t client_addr_len;
 } transaction_info;
 
@@ -30,15 +31,19 @@ typedef struct TransactionNode {
   transaction_info value;
   struct TransactionNode *next;
 } TransactionNode;
+#pragma pack(pop)
 
 typedef struct {
   TransactionNode *table[HASH_MAP_SIZE];
 } TransactionHashMap;
 
 TransactionHashMap *create_transaction_hash_map();
-void insert_transaction(TransactionHashMap *map, const transaction_info *tx);
+
+void insert_transaction(TransactionHashMap *map, const transaction_info tx);
+
 transaction_info *search_transaction(TransactionHashMap *map,
                                      uint16_t original_tx_id);
+
 void free_transaction_hash_map(TransactionHashMap *map);
 
 unsigned long hash(const char *str);
