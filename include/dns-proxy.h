@@ -26,8 +26,5 @@ void proxy_handle_request(struct dns_proxy *prx, struct sockaddr *addr,
                           uint16_t tx_id, char *dns_req, size_t dns_req_len);
 
 void proxy_stop(dns_proxy *proxy);
-void dns_proxy_handle_request(dns_proxy *proxy, const char *request,
-                              char *response, int response_size,
-                              uint16_t tx_id);
 
 #endif // DNS_PROXY

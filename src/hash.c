@@ -69,3 +69,49 @@ void free_hash_map(HashMap *map) {
   }
   free(map);
 }
+// Hash function for uint16_t
+unsigned long hash_uint16(uint16_t value) { return value % HASH_MAP_SIZE; }
+
+TransactionHashMap *create_transaction_hash_map() {
+  TransactionHashMap *map = malloc(sizeof(TransactionHashMap));
+  if (map) {
+    memset(map->table, 0, sizeof(map->table));
+  }
+  return map;
+}
+
+void insert_transaction(TransactionHashMap *map, const transaction_info *tx) {
+  unsigned long index = hash_uint16(tx->original_tx_id);
+  TransactionNode *newNode = malloc(sizeof(TransactionNode));
+  if (newNode) {
+    newNode->key = tx->original_tx_id;
+    newNode->value = *tx;
+    newNode->next = map->table[index];
+    map->table[index] = newNode;
+  }
+}
+
+transaction_info *search_transaction(TransactionHashMap *map,
+                                     uint16_t original_tx_id) {
+  unsigned long index = hash_uint16(original_tx_id);
+  TransactionNode *current = map->table[index];
+  while (current) {
+    if (current->key == original_tx_id) {
+      return &(current->value);
+    }
+    current = current->next;
+  }
+  return NULL;
+}
+
+void free_transaction_hash_map(TransactionHashMap *map) {
+  for (int i = 0; i < HASH_MAP_SIZE; i++) {
+    TransactionNode *current = map->table[i];
+    while (current) {
+      TransactionNode *temp = current;
+      current = current->next;
+      free(temp);
+    }
+  }
+  free(map);
+}

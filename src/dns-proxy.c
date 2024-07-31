@@ -1,11 +1,14 @@
 #include "../include/dns-proxy.h"
+#include <stdint.h>
+#include <sys/socket.h>
 
 static void proxy_process_request(dns_server *srv, void *cb_data, HashMap *map,
                                   struct sockaddr *addr, uint16_t tx_id,
                                   char *dns_req, size_t dns_req_len);
 
-static void proxy_process_response(void *data, char *response,
-                                   size_t response_len, uint16_t tx_id);
+static void proxy_process_response(void *data, struct sockaddr *addr,
+                                   char *response, size_t response_len,
+                                   uint16_t tx_id);
 
 static void proxy_handle_timeout(EV_P_ ev_timer *w, int revents);
 
@@ -28,7 +31,7 @@ void proxy_init(dns_proxy *prx, dns_client *clt, dns_server *srv,
 
   clt->cb = proxy_process_response;
   clt->cb_data = prx;
-  proxy_start(prx);
+  // proxy_start(prx);
 }
 
 void proxy_stop(dns_proxy *prx) { ev_break(prx->loop, EVBREAK_ALL); }
@@ -56,6 +59,7 @@ void proxy_handle_request(struct dns_proxy *prx, struct sockaddr *addr,
   }
 
   if (is_blacklisted(domain, prx->server->blacklist)) {
+    header->opcode = DNS_OPCODE_QUERY;
     header->rcode = *(uint8_t *)prx->server->cb_data;
     header->qr = 1; // This is the response
     header->ans_count = 0;
@@ -63,15 +67,21 @@ void proxy_handle_request(struct dns_proxy *prx, struct sockaddr *addr,
     free(dns_req);
     return;
   } else {
+    struct transaction_info tx_inf;
+    tx_inf.client_addr = (struct sockaddr_storage *)&addr;
+    tx_inf.original_tx_id = tx_id;
+    tx_inf.client_addr_len = sizeof(*addr);
+    insert_transaction(prx->client->transactions, &tx_inf);
     client_send_request(prx->client, dns_req, dns_req_len, tx_id);
     free(dns_req);
     return;
   }
 }
 
-void proxy_handle_response(dns_proxy *prx, char *response, size_t response_size,
+void proxy_handle_response(dns_proxy *prx, struct sockaddr *addr,
+                           char *response, size_t response_size,
                            uint16_t tx_id) {
-  server_send_response(prx->server, NULL, response, response_size);
+  server_send_response(prx->server, addr, response, response_size);
 }
 
 static void proxy_process_request(dns_server *srv, void *cb_data, HashMap *map,
@@ -81,10 +91,11 @@ static void proxy_process_request(dns_server *srv, void *cb_data, HashMap *map,
   proxy_handle_request(prx, addr, tx_id, dns_req, dns_req_len);
 }
 
-static void proxy_process_response(void *cb_data, char *response,
-                                   size_t response_size, uint16_t tx_id) {
+static void proxy_process_response(void *cb_data, struct sockaddr *addr,
+                                   char *response, size_t response_size,
+                                   uint16_t tx_id) {
   dns_proxy *prx = (dns_proxy *)cb_data;
-  proxy_handle_response(prx, response, response_size, tx_id);
+  proxy_handle_response(prx, addr, response, response_size, tx_id);
 }
 
 static void proxy_handle_timeout(EV_P_ ev_timer *w, int revents) {

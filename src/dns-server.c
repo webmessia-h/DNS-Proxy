@@ -53,14 +53,14 @@ static int init_socket(const char *listen_addr, int listen_port,
 static void server_receive_request(struct ev_loop *loop, ev_io *obs,
                                    int revents) {
 
-  dns_server *dns = (dns_server *)obs->data;
+  dns_server *srv = (dns_server *)obs->data;
   char *buffer = (char *)calloc(1, REQUEST_MAX + 1);
   if (buffer == NULL) {
     fprintf(stderr, "Failed buffer allocation\n");
     return;
   }
   struct sockaddr_storage raddr;
-  socklen_t tmp_addrlen = dns->addrlen;
+  socklen_t tmp_addrlen = srv->addrlen;
   ssize_t len = recvfrom(obs->fd, buffer, REQUEST_MAX, 0,
                          (struct sockaddr *)&raddr, &tmp_addrlen);
   if (len < 0) {
@@ -74,7 +74,7 @@ static void server_receive_request(struct ev_loop *loop, ev_io *obs,
     return;
   }
   uint16_t tx_id = ntohs(*((uint16_t *)buffer));
-  dns->cb(dns, dns->cb_data, dns->blacklist, (struct sockaddr *)&raddr, tx_id,
+  srv->cb(srv, srv->cb_data, srv->blacklist, (struct sockaddr *)&raddr, tx_id,
           buffer, len);
 }
 

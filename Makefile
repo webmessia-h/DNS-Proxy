@@ -1,14 +1,13 @@
 CC = gcc
 CFLAGS = -Wall
-LDFLAGS =  -lev -lcurl
-
+LDFLAGS =  -lev
 # Directories
 SRC_DIR = src
 INCLUDE_DIR = include
 OBJ_DIR = obj
 
 # Source files
-SRCS = $(SRC_DIR)/dns-server.c $(SRC_DIR)/https-client.c $(SRC_DIR)/hash.c $(SRC_DIR)/main.c $(SRC_DIR)/poller.c $(SRC_DIR)/config.c
+SRCS = $(SRC_DIR)/dns-server.c $(SRC_DIR)/dns-client.c $(SRC_DIR)/dns-proxy.c $(SRC_DIR)/hash.c $(SRC_DIR)/main.c $(SRC_DIR)/poller.c $(SRC_DIR)/config.c
 
 # Object files
 OBJS = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
@@ -25,7 +24,7 @@ all: $(TARGET)
 
 # Linking
 $(TARGET): $(OBJS)
-	$(CC) $(OBJS) -o $@
+	$(CC) $(OBJS) -o $@ $(LDFLAGS)
 
 # Compilation
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)

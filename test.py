@@ -37,6 +37,7 @@ if __name__ == "__main__":
         "microsoft.com",
         "google.com",
         "github.com",
+        "youtube.com",
     ]  # Add more domains as needed
 
     load_test(target_ip, target_port, queries_per_second, duration, domains)

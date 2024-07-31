@@ -1,12 +1,10 @@
 #include "../include/dns-client.h"
 #include <fcntl.h>
+#include <stdio.h>
 
-void client_receive_response(struct ev_loop *loop, ev_io *watcher,
-                             int revents) {
-  if (!(revents & EV_READ))
-    return;
-
-  dns_client *client = (dns_client *)watcher->data;
+static void client_receive_response(struct ev_loop *loop, ev_io *obs,
+                                    int revents) {
+  dns_client *client = (dns_client *)obs->data;
   char *buffer = (char *)calloc(1, REQUEST_MAX + 1);
   if (buffer == NULL) {
     fprintf(stderr, "Failed buffer allocation\n");
@@ -15,7 +13,7 @@ void client_receive_response(struct ev_loop *loop, ev_io *watcher,
   struct sockaddr_storage saddr;
   socklen_t src_addrlen = sizeof(saddr);
 
-  ssize_t len = recvfrom(watcher->fd, buffer, sizeof(buffer), 0,
+  ssize_t len = recvfrom(obs->fd, buffer, sizeof(buffer), 0,
                          (struct sockaddr *)&saddr, &src_addrlen);
 
   if (len < 0) {
@@ -30,8 +28,7 @@ void client_receive_response(struct ev_loop *loop, ev_io *watcher,
   }
 
   uint16_t tx_id = ntohs(*((uint16_t *)buffer));
-
-  client->cb(client->cb_data, buffer, len, tx_id);
+  client->cb(client->cb_data, (struct sockaddr *)&saddr, buffer, len, tx_id);
 }
 
 void client_init(dns_client *client, struct ev_loop *loop, res_callback cb,
@@ -39,6 +36,7 @@ void client_init(dns_client *client, struct ev_loop *loop, res_callback cb,
   client->loop = loop;
   client->cb = cb;
   client->cb_data = data;
+  client->transactions = map;
 
   for (int i = 0; i < RESOLVERS; i++) {
     struct addrinfo hints, *res;
@@ -55,7 +53,7 @@ void client_init(dns_client *client, struct ev_loop *loop, res_callback cb,
     client->resolvers[i].socket =
         socket(res->ai_family, res->ai_socktype, res->ai_protocol);
     if (client->resolvers[i].socket < 0) {
-      perror("Failed to create socket");
+      perror("Error creating socket");
       freeaddrinfo(res);
       return;
     }
@@ -88,14 +86,57 @@ void client_send_request(dns_client *client, const char *dns_req,
 
   resolver *res = &client->resolvers[current_resolver];
 
+  char ip_str[INET6_ADDRSTRLEN];
+  void *addr;
+  int port;
+
+  struct sockaddr_storage *addr_storage = (struct sockaddr_storage *)&res->addr;
+
+  if (addr_storage->ss_family == AF_INET) {
+    struct sockaddr_in *ipv4 = (struct sockaddr_in *)addr_storage;
+    addr = &(ipv4->sin_addr);
+    port = ntohs(ipv4->sin_port);
+  } else if (addr_storage->ss_family == AF_INET6) {
+    struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)addr_storage;
+    addr = &(ipv6->sin6_addr);
+    port = ntohs(ipv6->sin6_port);
+  } else {
+    fprintf(stderr, "Unknown address family\n");
+    return;
+  }
+
+  inet_ntop(addr_storage->ss_family, addr, ip_str, sizeof(ip_str));
+
+  ssize_t sent = sendto(res->socket, dns_req, req_len, 0,
+                        (struct sockaddr *)addr_storage, res->addrlen);
+
+  if (sent < 0) {
+    printf("sendto resolver failed: %s\n", strerror(errno));
+
+    // Additional error checking
+    if (errno == EDESTADDRREQ) {
+      printf("Socket state: ");
+      int error = 0;
+      socklen_t len = sizeof(error);
+      if (getsockopt(res->socket, SOL_SOCKET, SO_ERROR, &error, &len) < 0)
+        printf("Unable to get socket error\n");
+      else if (error != 0)
+        printf("Socket error: %s\n", strerror(error));
+      else
+        printf("No error reported\n");
+    }
+    return;
+  }
+
+  /*
   ssize_t sent = sendto(res->socket, dns_req, req_len, 0,
                         (struct sockaddr *)&res->addr, res->addrlen);
 
   if (sent < 0) {
-    printf("sendto client failed: %s", strerror(errno));
+    printf("sendto client failed: %s\t", strerror(errno));
     return;
   }
-
+  */
   return;
 }
 

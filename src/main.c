@@ -1,12 +1,11 @@
-#include "../include/config.h"
-#include "../include/dns-client.h"
-#include "../include/dns-server.h"
-#include "../include/hash.h"
+#include "../include/dns-proxy.h"
 #include <signal.h>
 #include <stdio.h>
 
 static struct ev_loop *loop;
 static dns_server server;
+static dns_client client;
+static dns_proxy proxy;
 static struct Options opts;
 
 static void sigint_cb(struct ev_loop *loop, ev_signal *obs, int revents) {
@@ -30,10 +29,11 @@ int main(void) {
 
   loop = EV_DEFAULT;
   options_init(&opts);
-  HashMap *map = create_hash_map();
+  HashMap *blacklist = create_hash_map();
+  HashMap *transactions = create_hash_map();
 
-  blacklist_hashmap(map);
-  if (map == NULL) {
+  blacklist_hashmap(blacklist);
+  if (blacklist == NULL) {
     fprintf(stderr, "Failed to create blacklist hashmap\n");
     return 1;
   }
@@ -42,14 +42,18 @@ int main(void) {
   ev_signal_init(&signal_observer, sigint_cb, SIGINT);
   ev_signal_start(loop, &signal_observer);
 
-  dns_server_init(&server, loop, handle_dns_request, opts.listen_addr,
-                  opts.listen_port, &opts.BLACKLISTED_RESPONSE, map);
+  server_init(&server, loop, NULL, opts.listen_addr, opts.listen_port,
+              &opts.BLACKLISTED_RESPONSE, blacklist);
+  client_init(&client, loop, NULL, upstream_resolver, transactions);
+
+  proxy_init(&proxy, &client, &server, loop);
 
   printf("DNS proxy started. Press Ctrl+C to stop.\n");
   ev_run(loop, 0);
 
-  dns_server_stop(&server);
-  dns_server_cleanup(&server);
-
+  server_stop(&server);
+  server_cleanup(&server);
+  client_cleanup(&client);
+  proxy_stop(&proxy);
   return 0;
 }
