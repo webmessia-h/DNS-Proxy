@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <sys/socket.h>
 
-static void proxy_process_request(dns_server *srv, void *cb_data, HashMap *map,
+static void proxy_process_request(dns_server *srv, void *cb_data,
                                   struct sockaddr *addr, uint16_t tx_id,
                                   char *dns_req, size_t dns_req_len);
 
@@ -59,7 +59,7 @@ void proxy_handle_request(struct dns_proxy *prx, struct sockaddr *addr,
     return;
   }
 
-  if (is_blacklisted(domain, prx->server->blacklist)) {
+  if (is_blacklisted(domain)) {
     header->opcode = DNS_OPCODE_QUERY;
     header->rcode = *(uint8_t *)prx->server->cb_data;
     header->qr = 1; // This is the response
@@ -72,11 +72,11 @@ void proxy_handle_request(struct dns_proxy *prx, struct sockaddr *addr,
      * Create a hashmap with transaction_info struct's
      * in order to determine receiver-client later
      */
-    struct transaction_info tx_info;
-    tx_info.client_addr = addr;
-    tx_info.original_tx_id = tx_id;
-    tx_info.client_addr_len = sizeof(*addr);
-    insert_transaction(prx->client->transactions, tx_info);
+    struct transaction_info *tx_info; /* move to main */
+    tx_info->client_addr = addr;
+    tx_info->original_tx_id = tx_id;
+    tx_info->client_addr_len = sizeof(*addr);
+    add_transaction_entry(tx_info);
     client_send_request(prx->client, dns_req, dns_req_len, tx_id);
     free(dns_req);
     return;
@@ -93,15 +93,13 @@ void proxy_handle_response(dns_proxy *prx, struct sockaddr *addr, char *dns_res,
     free(dns_res);
     return;
   }
-
-  transaction_info *current =
-      search_transaction(prx->client->transactions, header->id);
-
+  transaction_info *current = find_transaction(tx_id);
   server_send_response(prx->server, current->client_addr, dns_res,
                        response_size);
+  delete_transaction(tx_id);
 }
 
-static void proxy_process_request(dns_server *srv, void *cb_data, HashMap *map,
+static void proxy_process_request(dns_server *srv, void *cb_data,
                                   struct sockaddr *addr, uint16_t tx_id,
                                   char *dns_req, size_t dns_req_len) {
   dns_proxy *prx = (dns_proxy *)cb_data;

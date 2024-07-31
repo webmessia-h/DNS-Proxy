@@ -1,4 +1,4 @@
-#include "../include/config.h"
+#include "include/config.h"
 
 typedef enum {
   NOERROR = 0,
@@ -14,7 +14,7 @@ typedef enum {
 } dns_response; // DNS response codes
 
 const char *upstream_resolver[] = {"8.8.8.8", "1.1.1.1", "8.8.4.4"};
-const char *blacklist[] = {"microsoft.com", "google.com", "github.com"};
+const char *BLACKLIST[] = {"microsoft.com", "google.com", "github.com"};
 
 void options_init(struct Options *opts) {
   opts->listen_addr = "127.0.0.1";

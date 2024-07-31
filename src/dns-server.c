@@ -74,13 +74,12 @@ static void server_receive_request(struct ev_loop *loop, ev_io *obs,
     return;
   }
   uint16_t tx_id = ntohs(*((uint16_t *)buffer));
-  srv->cb(srv, srv->cb_data, srv->blacklist, (struct sockaddr *)&raddr, tx_id,
-          buffer, len);
+  srv->cb(srv, srv->cb_data, (struct sockaddr *)&raddr, tx_id, buffer, len);
 }
 
 void server_init(dns_server *srv, struct ev_loop *loop, req_callback cb,
                  const char *listen_addr, int listen_port, void *data,
-                 HashMap *map) {
+                 HashEntry *blacklist) {
   srv->loop = loop;
   srv->sockfd = init_socket(listen_addr, listen_port, &srv->addrlen);
   if (srv->sockfd < 0) {
@@ -89,16 +88,16 @@ void server_init(dns_server *srv, struct ev_loop *loop, req_callback cb,
   }
   srv->cb = cb;
   srv->cb_data = data;
-  srv->blacklist = map;
+  srv->blacklist = blacklist;
 
   ev_io_init(&srv->observer, server_receive_request, srv->sockfd, EV_READ);
   srv->observer.data = srv;
   ev_io_start(srv->loop, &srv->observer);
 }
 
-bool is_blacklisted(const char *domain, HashMap *map) {
+bool is_blacklisted(const char *domain) {
   for (int i = 0; i < BLACKLISTED_DOMAINS; i++) {
-    if (search(map, domain) == 1) {
+    if (find(domain) == 1) {
       return true;
     }
   }

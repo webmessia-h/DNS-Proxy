@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 #define BLACKLISTED_DOMAINS 3
-extern const char *blacklist[BLACKLISTED_DOMAINS];
+extern const char *BLACKLIST[BLACKLISTED_DOMAINS];
 #define RESOLVERS 3
 extern const char *upstream_resolver[RESOLVERS];
 

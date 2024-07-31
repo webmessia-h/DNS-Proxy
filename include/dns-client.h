@@ -22,14 +22,14 @@ typedef struct dns_client {
   res_callback cb;
   int sockfd;
   resolver resolvers[RESOLVERS];
-  TransactionHashMap *transactions;
+  TransactionHashEntry *transactions;
   ev_io observer;
   ev_timer timeout_observer;
   int timeout_ms;
 } dns_client;
 
 void client_init(dns_client *clt, struct ev_loop *loop, res_callback cb,
-                 void *data, HashMap *map);
+                 void *data, TransactionHashEntry *transactions);
 
 void client_send_request(dns_client *clt, const char *dns_req, size_t req_len,
                          uint16_t tx_id);

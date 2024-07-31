@@ -75,7 +75,7 @@ typedef struct {
 
 struct dns_server;
 
-typedef void (*req_callback)(struct dns_server *dns, void *data, HashMap *map,
+typedef void (*req_callback)(struct dns_server *dns, void *data,
                              struct sockaddr *addr, uint16_t tx_id,
                              char *dns_req, size_t dns_req_len);
 
@@ -86,7 +86,7 @@ typedef struct dns_server {
   int sockfd;
   socklen_t addrlen;
   ev_io observer;
-  HashMap *blacklist;
+  HashEntry *blacklist;
 } dns_server;
 
 /* Initialize self with:
@@ -97,13 +97,13 @@ typedef struct dns_server {
  */
 void server_init(dns_server *srv, struct ev_loop *loop, req_callback cb,
                  const char *listen_addr, int listen_port, void *data,
-                 HashMap *map);
+                 HashEntry *map);
 
-void handle_dns_request(struct dns_server *srv, void *data, HashMap *map,
+void handle_dns_request(struct dns_server *srv, void *data, HashEntry *map,
                         struct sockaddr *addr, uint16_t tx_id, char *dns_req,
                         size_t dns_req_len);
 
-bool is_blacklisted(const char *domain, HashMap *map);
+bool is_blacklisted(const char *domain);
 
 bool parse_domain_name(const char *dns_req, size_t dns_req_len, size_t offset,
                        char *domain, size_t domain_max_len);
