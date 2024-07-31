@@ -50,7 +50,8 @@ static int init_socket(const char *listen_addr, int listen_port,
   return sockfd;
 }
 
-static void observer_cb(struct ev_loop *loop, ev_io *obs, int revents) {
+static void server_receive_request(struct ev_loop *loop, ev_io *obs,
+                                   int revents) {
 
   dns_server *dns = (dns_server *)obs->data;
   char *buffer = (char *)calloc(1, REQUEST_MAX + 1);
@@ -77,9 +78,9 @@ static void observer_cb(struct ev_loop *loop, ev_io *obs, int revents) {
           buffer, len);
 }
 
-void dns_server_init(dns_server *srv, struct ev_loop *loop, req_callback cb,
-                     const char *listen_addr, int listen_port, void *data,
-                     HashMap *map) {
+void server_init(dns_server *srv, struct ev_loop *loop, req_callback cb,
+                 const char *listen_addr, int listen_port, void *data,
+                 HashMap *map) {
   srv->loop = loop;
   srv->sockfd = init_socket(listen_addr, listen_port, &srv->addrlen);
   if (srv->sockfd < 0) {
@@ -90,7 +91,7 @@ void dns_server_init(dns_server *srv, struct ev_loop *loop, req_callback cb,
   srv->cb_data = data;
   srv->blacklist = map;
 
-  ev_io_init(&srv->observer, observer_cb, srv->sockfd, EV_READ);
+  ev_io_init(&srv->observer, server_receive_request, srv->sockfd, EV_READ);
   srv->observer.data = srv;
   ev_io_start(srv->loop, &srv->observer);
 }
@@ -153,51 +154,14 @@ bool parse_domain_name(const char *dns_req, size_t dns_req_len, size_t offset,
   return true;
 }
 
-void handle_dns_request(struct dns_server *srv, void *data, HashMap *map,
-                        struct sockaddr *addr, uint16_t tx_id, char *dns_req,
-                        size_t dns_req_len) {
-  // Assuming the DNS header is at the start of buffer (dns_req)
-  dns_header *header = (dns_header *)dns_req;
-
-  if (ntohs(header->qd_count) == 0) {
-    printf("No questions in the request. id:%d\n", tx_id);
-    free(dns_req);
-    return;
-  }
-
-  // Offset to the query section (DNS header is 12 bytes)
-  size_t query_offset = sizeof(*header);
-  char domain[MAX_DOMAIN_LENGTH];
-
-  if (!parse_domain_name(dns_req, dns_req_len, query_offset, domain,
-                         sizeof(domain))) {
-    fprintf(stderr, "Failed to parse domain name. id:%d\n", tx_id);
-    free(dns_req);
-    return;
-  }
-
-  if (is_blacklisted(domain, map)) {
-    header->rcode = *(uint8_t *)data;
-    header->qr = 1; // This is the response
-    header->ans_count = 0;
-    dns_server_respond(srv, addr, dns_req, dns_req_len);
-    free(dns_req);
-    return;
-  } else {
-    // TODO forward to client and send to upstream resolver
-    free(dns_req);
-    return;
-  }
-}
-
-void dns_server_respond(dns_server *srv, struct sockaddr *raddr, char *buffer,
-                        size_t buflen) {
+void server_send_response(dns_server *srv, struct sockaddr *raddr, char *buffer,
+                          size_t buflen) {
   ssize_t sent = sendto(srv->sockfd, buffer, buflen, 0, raddr, srv->addrlen);
   if (sent < 0) {
     printf("sendto client failed: %s", strerror(errno));
   }
 }
 
-void dns_server_stop(dns_server *srv) { ev_io_stop(srv->loop, &srv->observer); }
+void server_stop(dns_server *srv) { ev_io_stop(srv->loop, &srv->observer); }
 
-void dns_server_cleanup(dns_server *srv) { close(srv->sockfd); }
+void server_cleanup(dns_server *srv) { close(srv->sockfd); }

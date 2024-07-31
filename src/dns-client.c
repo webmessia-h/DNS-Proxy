@@ -1,8 +1,8 @@
 #include "../include/dns-client.h"
 #include <fcntl.h>
 
-static void handle_resolver_read(struct ev_loop *loop, ev_io *watcher,
-                                 int revents) {
+void client_receive_response(struct ev_loop *loop, ev_io *watcher,
+                             int revents) {
   if (!(revents & EV_READ))
     return;
 
@@ -34,8 +34,8 @@ static void handle_resolver_read(struct ev_loop *loop, ev_io *watcher,
   client->cb(client->cb_data, buffer, len, tx_id);
 }
 
-void dns_client_init(dns_client *client, struct ev_loop *loop, res_callback cb,
-                     void *data, HashMap *map) {
+void client_init(dns_client *client, struct ev_loop *loop, res_callback cb,
+                 void *data, HashMap *map) {
   client->loop = loop;
   client->cb = cb;
   client->cb_data = data;
@@ -68,7 +68,7 @@ void dns_client_init(dns_client *client, struct ev_loop *loop, res_callback cb,
 
     freeaddrinfo(res);
 
-    ev_io_init(&client->resolvers[i].observer, handle_resolver_read,
+    ev_io_init(&client->resolvers[i].observer, client_receive_response,
                client->resolvers[i].socket, EV_READ);
     client->resolvers[i].observer.data = client;
     ev_io_start(client->loop, &client->resolvers[i].observer);
@@ -77,8 +77,8 @@ void dns_client_init(dns_client *client, struct ev_loop *loop, res_callback cb,
   return;
 }
 
-void dns_client_send_request(dns_client *client, const char *dns_req,
-                             size_t req_len, uint16_t tx_id) {
+void client_send_request(dns_client *client, const char *dns_req,
+                         size_t req_len, uint16_t tx_id) {
   if (sizeof(upstream_resolver) == 0)
     return;
 
@@ -99,7 +99,7 @@ void dns_client_send_request(dns_client *client, const char *dns_req,
   return;
 }
 
-void dns_client_cleanup(dns_client *client) {
+void client_cleanup(dns_client *client) {
   for (int i = 0; i < RESOLVERS; i++) {
     ev_io_stop(client->loop, &client->resolvers[i].observer);
     close(client->resolvers[i].socket);

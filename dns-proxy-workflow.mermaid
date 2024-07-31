@@ -1,0 +1,11 @@
+graph TD
+    A[DNS Client] -->|Request| B[DNS Server]
+    B -->|Forward Request| C[DNS Proxy]
+    C -->|Check Blacklist| D{Is Blacklisted?}
+    D -->|Yes| E[Return Blocked Response]
+    D -->|No| F[DNS Client Component]
+    F -->|Forward to Upstream| G[Upstream DNS Resolver]
+    G -->|Response| F
+    F -->|Forward Response| C
+    C -->|Return Response| B
+    B -->|Response| A
