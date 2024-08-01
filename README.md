@@ -62,7 +62,7 @@ make all -j($nproc)
 ```
 
 > [!IMPORTANT]
-> To configure DNS Proxy refer to config.c and include/config.h, I've tried to be as verbose as possible with comments in those files 
+> To configure DNS Proxy refer to config.c and include/config.h
 
 
 To run the DNS proxy:
@@ -90,5 +90,7 @@ The project has been tested with dnsperf for performance evaluation.
 ## Benchmark
 
 Below is a benchmark result of the DNS proxy:
+> [!IMPORTANT] 
+> `NXDOMAIN` is a blacklisted response, can be configured to another response type
 
 ![Benchmark Results](assets/benchmark/test.png)
