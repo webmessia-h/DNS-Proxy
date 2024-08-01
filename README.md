@@ -82,7 +82,8 @@ chmod +x assets/tests/test.sh
 Then you can run the test:
 
 ```sh
-./assets/tests/test.sh
+cd assets/tests/
+./test.sh
 ```
 
 The project has been tested with dnsperf for performance evaluation.
