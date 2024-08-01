@@ -73,7 +73,7 @@ sudo ./dns-proxy
 
 ## Testing
 
-This project includes a test script located at `assets/tests/test.sh`. Before running the test, you need to give it execution permission:
+This project includes a test script which uses `dnsperf`, it is located at `assets/tests/test.sh`. Before running the test, you need to give it execution permission:
 
 ```sh
 chmod +x assets/tests/test.sh
@@ -90,7 +90,7 @@ The project has been tested with dnsperf for performance evaluation.
 
 ## Benchmark
 
-Below is a benchmark result of the DNS proxy:
+Below is a benchmark result of the DNS proxy using `valgrind` and `dnsperf`:
 > [!IMPORTANT] 
 > `NXDOMAIN` is a blacklisted response, can be configured to another response type
 
