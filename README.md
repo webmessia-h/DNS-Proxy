@@ -93,5 +93,22 @@ The project has been tested with dnsperf for performance evaluation.
 Below is a benchmark result of the DNS proxy using `valgrind` and `dnsperf`:
 > [!IMPORTANT] 
 > `NXDOMAIN` is a blacklisted response, can be configured to another response type
+>
+> ## Testing conditions can be found in default config, but I'll duplicate them here: ##
+>
+ > ### dnsperf acting as 4 clients, using 4 threads, sending queries to: ###
+>> ```github.com
+>> microsoft.com - blacklisted
+>> google.com - blacklisted
+>> youtube.com
+>> torproject.org
+> ### for 10 minutes with `REDIRECT` flag set to 0. ###
+>
+> ### Upstream resolvers used in test (all at once): ###
+>> ```
+>> 8.8.8.8
+>> 1.1.1.1
+>> 8.8.4.4
+>>```
 
 ![Benchmark Results](assets/benchmark/test.png)
