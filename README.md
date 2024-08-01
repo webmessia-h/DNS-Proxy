@@ -8,12 +8,10 @@ A high-performance DNS proxy server implemented in C.
 
 This DNS proxy server is designed to provide high-performance DNS request handling with features such as blacklisting and request redirection. It uses libev for efficient event handling and uthash for fast hash table operations.
 
-## Dependencies
-
-This project depends on the following libraries:
-
-- libev
-- uthash
+> [!CAUTION]
+> This project depends on the following libraries:
+> - libev
+> - uthash
 
 ### Installing Dependencies
 
@@ -63,7 +61,9 @@ To build the project:
 make all -j($nproc)
 ```
 
-To configure DNS Proxy refer to config.c and include/config.h, I've tried to be as verbose as possible with comments in those files
+> [!IMPORTANT]
+> To configure DNS Proxy refer to config.c and include/config.h, I've tried to be as verbose as possible with comments in those files 
+
 
 To run the DNS proxy:
 
