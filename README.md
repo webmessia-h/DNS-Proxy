@@ -23,7 +23,7 @@ sudo apt-get install libev-dev uthash-dev
 ```
 
 uthash is a header-only library. 
-You can download it from [Troy D. Hanson's repository](https://github.com/troydhanson/uthash) or with your preffered package manager.
+You can download it from [Troy D. Hanson's repository](https://github.com/troydhanson/uthash) if you want.
 
 #### On macOS (using Homebrew):
 
