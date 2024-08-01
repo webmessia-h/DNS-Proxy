@@ -1,0 +1,6 @@
+github.com A
+microsoft.com A
+google.com A
+youtube.com A
+torproject.org A
+
