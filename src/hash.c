@@ -52,6 +52,7 @@ void delete_all_transactions() {
   TransactionHashEntry *current_entry, *tmp;
   HASH_ITER(hh, transactions, current_entry, tmp) {
     HASH_DEL(transactions, current_entry);
+    free(current_entry->value);
     free(current_entry);
   }
 }

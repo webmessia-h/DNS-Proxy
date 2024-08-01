@@ -85,30 +85,31 @@ void client_send_request(dns_client *client, const char *dns_req,
   current_resolver = (current_resolver + 1) % RESOLVERS;
 
   resolver *res = &client->resolvers[current_resolver];
+  /*
+    char ip_str[INET6_ADDRSTRLEN];
+    void *addr;
+    int port;
 
-  char ip_str[INET6_ADDRSTRLEN];
-  void *addr;
-  int port;
+    struct sockaddr_storage *addr_storage = (struct sockaddr_storage
+    *)&res->addr;
 
-  struct sockaddr_storage *addr_storage = (struct sockaddr_storage *)&res->addr;
+    if (addr_storage->ss_family == AF_INET) {
+      struct sockaddr_in *ipv4 = (struct sockaddr_in *)addr_storage;
+      addr = &(ipv4->sin_addr);
+      port = ntohs(ipv4->sin_port);
+    } else if (addr_storage->ss_family == AF_INET6) {
+      struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)addr_storage;
+      addr = &(ipv6->sin6_addr);
+      port = ntohs(ipv6->sin6_port);
+    } else {
+      fprintf(stderr, "Unknown address family\n");
+      return;
+    }
 
-  if (addr_storage->ss_family == AF_INET) {
-    struct sockaddr_in *ipv4 = (struct sockaddr_in *)addr_storage;
-    addr = &(ipv4->sin_addr);
-    port = ntohs(ipv4->sin_port);
-  } else if (addr_storage->ss_family == AF_INET6) {
-    struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)addr_storage;
-    addr = &(ipv6->sin6_addr);
-    port = ntohs(ipv6->sin6_port);
-  } else {
-    fprintf(stderr, "Unknown address family\n");
-    return;
-  }
-
-  inet_ntop(addr_storage->ss_family, addr, ip_str, sizeof(ip_str));
-
+    inet_ntop(addr_storage->ss_family, addr, ip_str, sizeof(ip_str));
+  */
   ssize_t sent = sendto(res->socket, dns_req, req_len, 0,
-                        (struct sockaddr *)addr_storage, res->addrlen);
+                        (struct sockaddr *)&res->addr, res->addrlen);
 
   if (sent < 0) {
     printf("sendto resolver failed: %s\n", strerror(errno));
@@ -127,16 +128,6 @@ void client_send_request(dns_client *client, const char *dns_req,
     }
     return;
   }
-
-  /*
-  ssize_t sent = sendto(res->socket, dns_req, req_len, 0,
-                        (struct sockaddr *)&res->addr, res->addrlen);
-
-  if (sent < 0) {
-    printf("sendto client failed: %s\t", strerror(errno));
-    return;
-  }
-  */
   return;
 }
 

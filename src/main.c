@@ -13,6 +13,12 @@ TransactionHashEntry *transactions = NULL;
 static void sigint_cb(struct ev_loop *loop, ev_signal *obs, int revents) {
   fprintf(stderr, "Received SIGINT, stopping...\n");
   ev_break(loop, EVBREAK_ALL);
+  server_stop(&server);
+  server_cleanup(&server);
+  client_cleanup(&client);
+  proxy_stop(&proxy);
+  delete_blacklist();
+  delete_all_transactions();
 }
 
 static void populate_blacklist(void) {
@@ -31,18 +37,15 @@ int main(void) {
   ev_signal_init(&signal_observer, sigint_cb, SIGINT);
   ev_signal_start(loop, &signal_observer);
 
-  server_init(&server, loop, NULL, opts.listen_addr, opts.listen_port,
-              &opts.BLACKLISTED_RESPONSE, blacklist);
+  server_init(&server, loop, NULL, opts.listen_addr, opts.listen_port, NULL,
+              blacklist);
   client_init(&client, loop, NULL, upstream_resolver, transactions);
 
   proxy_init(&proxy, &client, &server, loop);
 
   printf("DNS proxy started. Press Ctrl+C to stop.\n");
   ev_run(loop, 0);
+  ev_loop_destroy(loop);
 
-  server_stop(&server);
-  server_cleanup(&server);
-  client_cleanup(&client);
-  proxy_stop(&proxy);
   return 0;
 }

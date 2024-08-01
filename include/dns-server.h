@@ -4,6 +4,8 @@
 #include "hash.h"
 #include "include.h"
 
+enum { MTU = 1500 };
+
 typedef enum header_flags {
   DNS_FLAG_QR = 0x8000,     // 1000 0000 0000 0000 (QR bit)
   DNS_FLAG_OPCODE = 0x7800, // 0111 1000 0000 0000 (Opcode bits)

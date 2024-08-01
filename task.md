@@ -33,23 +33,3 @@ Write a DNS proxy server with a domains blacklist feature to filter unwanted hos
 
 3. **Discretionary Requirements**:
    - All other requirements and restrictions are up to your discretion.
-
-## Expectations
-
-### Deliverables
-
-1. **Source Code**:
-   - Source code of DNS proxy server written according to the requirements.
-   - Source code should be in plain ASCII text.
-2. **Build Instructions**:
-   - Instructions on how to build, configure, and run the proxy server (including necessary files like Makefile, etc).
-3. **Testing Description**:
-   - Description of how you tested the proxy server.
-4. **Additional Documentation**:
-   - Document any additional (known to you) limitations or restrictions.
-   - Document any extra features your solution has beyond the requested requirements.
-
-### Submission
-
-- If you have a GitHub (or similar) account, you can publish everything there.
-- Otherwise, put everything into an archive.

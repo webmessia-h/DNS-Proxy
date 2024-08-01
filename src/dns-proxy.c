@@ -1,4 +1,5 @@
 #include "../include/dns-proxy.h"
+#include <stdint.h>
 
 static void proxy_process_request(dns_server *srv, void *cb_data,
                                   struct sockaddr *addr, uint16_t tx_id,
@@ -58,12 +59,66 @@ void proxy_handle_request(struct dns_proxy *prx, struct sockaddr *addr,
 
   if (is_blacklisted(domain)) {
 #if REDIRECT == 1
-    // TODO : implement redirection
+    /* @brief
+     * Creates new packet with old request header but new question
+     */
+    size_t redir_len = dns_req_len - (strlen(domain) + 2) + strlen(redirect_to);
+    char *dns_redir = (char *)malloc(redir_len);
+    if (dns_redir == NULL) {
+      fprintf(stderr, "Memory allocation failed. id:%d\n", tx_id);
+      free(dns_req);
+      return;
+    }
+    // Copy the DNS header from the request to the redirect
+    memcpy(dns_redir, dns_req, sizeof(*header));
+    dns_header *redir_header = (dns_header *)dns_redir;
+
+    // Copy the question section from redirect_to string
+    size_t redir_query_offset = query_offset;
+    memcpy(dns_redir + redir_query_offset, *redirect_to,
+           strlen(redirect_to) + 1);
+    // Copy the rest of the query section (QTYPE and QCLASS)
+    size_t rest_of_query_offset = query_offset + strlen(redirect_to) + 1;
+    size_t rest_of_query_len =
+        dns_req_len - (query_offset + strlen(domain) + 2);
+    memcpy(dns_redir + rest_of_query_offset,
+           dns_req + query_offset + strlen(domain) + 2, rest_of_query_len);
+    struct transaction_info *tx_info =
+        malloc(sizeof(struct transaction_info)); /* will be free'd upon deletion
+                                                    of transaction_entry in
+                                                    proxy_handle_respose */
+    tx_info->client_addr = *addr;
+    tx_info->original_tx_id = tx_id;
+    tx_info->client_addr_len = sizeof(*addr);
+    add_transaction_entry(tx_info);
+    client_send_request(prx->client, dns_redir, dns_req_len, tx_id);
+    free(dns_redir);
+    free(dns_req);
+    return;
 #else
-    header->rcode = *(uint8_t *)prx->server->cb_data;
-    header->qr = 1; // This is the response
-    header->rd = 0; // Not recursion desired
-    server_send_response(prx->server, addr, dns_req, dns_req_len);
+    // Allocate memory for the new response packet
+    size_t response_len = dns_req_len;
+    char *dns_resp = (char *)malloc(response_len);
+    if (dns_resp == NULL) {
+      fprintf(stderr, "Memory allocation failed. id:%d\n", tx_id);
+      free(dns_req);
+      return;
+    }
+
+    // Copy the DNS header from the request to the response
+    memcpy(dns_resp, dns_req, sizeof(*header));
+    dns_header *resp_header = (dns_header *)dns_resp;
+
+    // Copy the question section from the request to the response
+    memcpy(dns_resp + query_offset, dns_req + query_offset,
+           dns_req_len - query_offset);
+
+    // Modify the DNS header to indicate this is a response and set the RCODE
+    resp_header->rcode = BLACKLISTED_RESPONSE;
+    resp_header->qr = (uint8_t)1; // This is the response
+    resp_header->rd = (uint8_t)0; // Not recursion desired
+    server_send_response(prx->server, addr, dns_resp, sizeof(dns_resp));
+    free(dns_resp);
     free(dns_req);
     return;
 #endif
@@ -71,9 +126,10 @@ void proxy_handle_request(struct dns_proxy *prx, struct sockaddr *addr,
     /* @brief
      *  insert transaction_info into hashmap in order to know endpoint receiver
      */
-    struct transaction_info *tx_info = malloc(
-        sizeof(struct transaction_info)); /* will be freed upon deletion of
-                                             entry in proxy_handle_respose */
+    struct transaction_info *tx_info =
+        malloc(sizeof(struct transaction_info)); /* will be free'd upon deletion
+                                                    of transaction_entry in
+                                                    proxy_handle_respose */
     tx_info->client_addr = *addr;
     tx_info->original_tx_id = tx_id;
     tx_info->client_addr_len = sizeof(*addr);
@@ -98,6 +154,7 @@ void proxy_handle_response(dns_proxy *prx, struct sockaddr *addr, char *dns_res,
   server_send_response(prx->server, (struct sockaddr *)&current->client_addr,
                        dns_res, response_size);
   delete_transaction(tx_id);
+  free(dns_res);
 }
 
 static void proxy_process_request(dns_server *srv, void *cb_data,
