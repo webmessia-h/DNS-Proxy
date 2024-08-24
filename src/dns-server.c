@@ -28,7 +28,7 @@ static int init_socket(const char *listen_addr, int listen_port,
 
   int sockfd = socket(ai->ai_family, SOCK_DGRAM, 0);
   if (sockfd < 0) {
-    fprintf(stderr,"Error creating socket",strerror(errno));
+    fprintf(stderr,"Error creating socket: %s",strerror(errno));
     freeaddrinfo(ai);
     ok = false;
     }

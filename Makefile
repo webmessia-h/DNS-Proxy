@@ -1,8 +1,6 @@
 # Directories
 SRC_DIR = src
-INCLUDE_DIR = include
 OBJ_DIR = obj
-
 # Source files
 SRCS = $(wildcard $(SRC_DIR)/*.c)
 
@@ -11,7 +9,7 @@ OBJS = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 
 # Flags
 CC = gcc
-CFLAGS = -I$(INCLUDE_DIR)
+CFLAGS = -I./include
 LDFLAGS =  -lev
 
 # Executable

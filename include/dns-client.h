@@ -1,7 +1,6 @@
 #ifndef DNS_CLIENT
 #define DNS_CLIENT
 
-#include "config.h"
 #include "hash.h"
 #include "include.h"
 
