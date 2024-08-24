@@ -6,6 +6,7 @@ static int init_socket(const char *listen_addr, int listen_port,
                        unsigned int *addrlen) {
   struct addrinfo *ai = NULL;
   struct addrinfo hints;
+  bool ok = true;
   memset(&hints, 0, sizeof(struct addrinfo));
   // Prevent DNS lookups if leakage is our worry
   hints.ai_flags = AI_NUMERICHOST;
@@ -17,8 +18,8 @@ static int init_socket(const char *listen_addr, int listen_port,
     if (ai) {
       freeaddrinfo(ai);
     }
-    return -1;
-  }
+    ok = false;
+    }
 
   struct sockaddr_in *saddr = (struct sockaddr_in *)ai->ai_addr;
 
@@ -27,10 +28,10 @@ static int init_socket(const char *listen_addr, int listen_port,
 
   int sockfd = socket(ai->ai_family, SOCK_DGRAM, 0);
   if (sockfd < 0) {
-    perror("Error creating socket");
+    fprintf(stderr,"Error creating socket",strerror(errno));
     freeaddrinfo(ai);
-    return -1;
-  }
+    ok = false;
+    }
 
   res = bind(sockfd, ai->ai_addr, ai->ai_addrlen);
   if (res < 0) {
@@ -38,11 +39,12 @@ static int init_socket(const char *listen_addr, int listen_port,
             strerror(errno), res);
     close(sockfd);
     freeaddrinfo(ai);
-    return -1;
-  }
+    ok = false;
+    }
 
   freeaddrinfo(ai);
-
+ 
+  if (!ok) exit(errno);
   printf("Listening on %s:%d\n", listen_addr, listen_port);
   return sockfd;
 }
