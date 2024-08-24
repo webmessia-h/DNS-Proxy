@@ -1,8 +1,5 @@
-#include "../include/dns-server.h"
-
-#include <stdio.h>
-
-#include "../include/config.h" /* Main configuration file */
+#include "dns-server.h"
+#include "config.h" /* Main configuration file */
 
 // Creates and bind a listening UDP socket for incoming requests.
 static int init_socket(const char *listen_addr, int listen_port,

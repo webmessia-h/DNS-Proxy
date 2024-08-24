@@ -1,5 +1,6 @@
-#include "../include/dns-proxy.h"
-#include <stdint.h>
+#include "dns-proxy.h"
+#include "config.h" /* Main configuration file */
+
 
 static void proxy_process_request(dns_server *srv, void *cb_data,
                                   struct sockaddr *addr, uint16_t tx_id,
@@ -117,7 +118,7 @@ void proxy_handle_request(struct dns_proxy *prx, struct sockaddr *addr,
     resp_header->rcode = BLACKLISTED_RESPONSE;
     resp_header->qr = (uint8_t)1; // This is the response
     resp_header->rd = (uint8_t)0; // Not recursion desired
-    server_send_response(prx->server, addr, dns_resp, sizeof(dns_resp));
+    server_send_response(prx->server, addr, dns_resp, response_len);
     free(dns_resp);
     free(dns_req);
     return;

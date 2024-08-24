@@ -1,6 +1,5 @@
-#include "../include/dns-proxy.h"
+#include "dns-proxy.h"
 #include <signal.h>
-#include <stdio.h>
 
 static struct ev_loop *loop;
 static dns_server server;

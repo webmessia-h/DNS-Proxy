@@ -1,4 +1,4 @@
-#include "../include/hash.h"
+#include "hash.h"
 
 void add_blacklist_entry(const char *key) {
   HashEntry *entry = malloc(sizeof(HashEntry));

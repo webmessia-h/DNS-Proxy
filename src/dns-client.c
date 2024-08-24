@@ -1,6 +1,5 @@
-#include "../include/dns-client.h"
-#include <fcntl.h>
-#include <stdio.h>
+#include "dns-client.h"
+#include "config.h" /* Main configuration file */
 
 static void client_receive_response(struct ev_loop *loop, ev_io *obs,
                                     int revents) {
