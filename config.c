@@ -1,4 +1,4 @@
-#include "include/config.h"
+#include "config.h"
 
 typedef enum {
   NOERROR = 0,

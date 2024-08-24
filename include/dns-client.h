@@ -4,7 +4,6 @@
 #include "config.h"
 #include "hash.h"
 #include "include.h"
-#include <sys/socket.h>
 
 typedef void (*res_callback)(void *data, struct sockaddr *addr, char *response,
                              size_t res_len, uint16_t tx_id);

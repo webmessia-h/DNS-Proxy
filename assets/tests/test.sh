@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 check_dnsperf() {
     if ! command -v dnsperf &> /dev/null; then

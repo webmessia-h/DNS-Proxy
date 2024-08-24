@@ -34,6 +34,5 @@ typedef struct Options options;
 
 void options_init(struct Options *opt);
 
-#define BUFFER_SIZE /*desired buffer size*/
 
 #endif // CONFIG_H

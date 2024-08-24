@@ -1,26 +1,28 @@
-CC = gcc
-CFLAGS =
-LDFLAGS =  -lev
 # Directories
 SRC_DIR = src
 INCLUDE_DIR = include
 OBJ_DIR = obj
 
 # Source files
-SRCS = $(SRC_DIR)/dns-server.c $(SRC_DIR)/dns-client.c $(SRC_DIR)/dns-proxy.c $(SRC_DIR)/hash.c $(SRC_DIR)/main.c config.c
+SRCS = $(wildcard $(SRC_DIR)/*.c)
 
 # Object files
 OBJS = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 
+# Flags
+CC = gcc
+CFLAGS = -I$(INCLUDE_DIR)
+LDFLAGS =  -lev
+
 # Executable
 TARGET = dns-proxy
+
+# Default target
+all: $(TARGET)
 
 # Create obj directory if it doesn't exist
 $(OBJ_DIR):
 	mkdir -p $(OBJ_DIR)
-
-# Default target
-all: $(TARGET)
 
 # Linking
 $(TARGET): $(OBJS)
@@ -28,11 +30,14 @@ $(TARGET): $(OBJS)
 
 # Compilation
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -MMD -c $< -o $@
+
+# Include the dependency files generated
+-include $(OBJS:.o=.d)
 
 # Clean up
 clean:
-	rm -rf $(OBJ_DIR) $(TARGET)
+	rm -rf $(OBJ_DIR) $(TARGET) $(OBJS:.o=.d)
 
 # Phony targets
 .PHONY: all clean
