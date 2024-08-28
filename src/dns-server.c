@@ -19,7 +19,7 @@ static int init_socket(const char *listen_addr, int listen_port,
       freeaddrinfo(ai);
     }
     ok = false;
-    }
+  }
 
   struct sockaddr_in *saddr = (struct sockaddr_in *)ai->ai_addr;
 
@@ -28,10 +28,10 @@ static int init_socket(const char *listen_addr, int listen_port,
 
   int sockfd = socket(ai->ai_family, SOCK_DGRAM, 0);
   if (sockfd < 0) {
-    fprintf(stderr,"Error creating socket: %s",strerror(errno));
+    fprintf(stderr, "Error creating socket: %s", strerror(errno));
     freeaddrinfo(ai);
     ok = false;
-    }
+  }
 
   res = bind(sockfd, ai->ai_addr, ai->ai_addrlen);
   if (res < 0) {
@@ -40,11 +40,12 @@ static int init_socket(const char *listen_addr, int listen_port,
     close(sockfd);
     freeaddrinfo(ai);
     ok = false;
-    }
+  }
 
   freeaddrinfo(ai);
- 
-  if (!ok) exit(errno);
+
+  if (!ok)
+    exit(errno);
   printf("Listening on %s:%d\n", listen_addr, listen_port);
   return sockfd;
 }
@@ -103,7 +104,6 @@ bool is_blacklisted(const char *domain) {
   return false;
 }
 
-// TODO :  return a pointer to question start so we can redirect
 bool parse_domain_name(const char *dns_req, size_t dns_req_len, size_t offset,
                        char *domain, size_t domain_max_len) {
   size_t pos = offset;

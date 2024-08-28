@@ -58,7 +58,7 @@ graph TD
 To build the project:
 
 ```sh
-make all -j($nproc)
+make -j($nproc)
 ```
 
 > [!IMPORTANT]
