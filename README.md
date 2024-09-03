@@ -4,26 +4,34 @@
 <a href="#"><img alt="CMake" src="https://img.shields.io/badge/Make-black?style=for-the-badge&logo=gnu&logoColor=white"></a>
 
 A high-performance DNS proxy server implemented in C.
+
 ## Project Overview
 
 This DNS proxy server is designed to provide high-performance DNS request handling with features such as blacklisting and request redirection. It uses libev for efficient event handling and uthash for fast hash table operations.
 
 > [!CAUTION]
 > This project depends on the following libraries:
+>
 > - libev
 > - uthash
 
 ### Installing Dependencies
 
-#### On Ubuntu/Debian:
+#### On Linux:
 
 ```sh
-sudo apt-get update
-sudo apt-get install libev-dev uthash-dev
+sudo *your package manager* *update*
+sudo *your package manager* libev-dev uthash-dev
 ```
 
-uthash is a header-only library. 
+uthash is a header-only library.
 You can download it from [Troy D. Hanson's repository](https://github.com/troydhanson/uthash) if you want.
+
+#### Nix\* OS/package manager:
+
+```sh
+nix-shell # includes libraries and dnsperf for testing
+```
 
 #### On macOS (using Homebrew):
 
@@ -64,7 +72,6 @@ make -j($nproc)
 > [!IMPORTANT]
 > To configure DNS Proxy refer to config.c and include/config.h
 
-
 To run the DNS proxy:
 
 ```sh
@@ -90,27 +97,33 @@ The project has been tested with dnsperf for performance evaluation.
 
 ## Benchmark
 
-### Below is a benchmark result of the DNS proxy using `valgrind` and `dnsperf`: 
-> [!IMPORTANT] 
+### Below is a benchmark result of the DNS proxy using `valgrind` and `dnsperf`:
+
+> [!IMPORTANT]
 > `NXDOMAIN` is a blacklisted response, can be configured to another response type
 >
-> #### Testing conditions can be found in default config, but I'll duplicate them here: 
+> #### Testing conditions can be found in default config, but I'll duplicate them here:
 >
- > ##### `valgrind G_SLICE=always-malloc valgrind -s --leak-check=full --show-leak-kinds=all ./dns-proxy --debug `
- > #### `dnsperf` acting as 4 clients, using 4 threads, sending queries to: ###
->> ```plaintext
->> github.com
->> microsoft.com - blacklisted
->> google.com - blacklisted
->> youtube.com
->> torproject.org
-> #### for 10 minutes with `REDIRECT` flag set to 0. ###
+> ##### `valgrind G_SLICE=always-malloc valgrind -s --leak-check=full --show-leak-kinds=all ./dns-proxy --debug `
 >
-> #### Upstream resolvers used in test (all at once): ###
->> ```plaintext
->> 8.8.8.8
->> 1.1.1.1
->> 8.8.4.4
->>``` 
+> #### `dnsperf` acting as 4 clients, using 4 threads, sending queries to:
+>
+> > ```plaintext
+> > github.com
+> > microsoft.com - blacklisted
+> > google.com - blacklisted
+> > youtube.com
+> > torproject.org
+> > ```
+>
+> #### for 10 minutes with `REDIRECT` flag set to 0.
+>
+> #### Upstream resolvers used in test (all at once):
+>
+> > ```plaintext
+> > 8.8.8.8
+> > 1.1.1.1
+> > 8.8.4.4
+> > ```
 
 ![Benchmark Results](assets/benchmark/test.png)

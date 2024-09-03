@@ -24,16 +24,6 @@ typedef enum opcodes {
   DNS_OPCODE_STATUS = 2
 } opcodes;
 
-// Rcodes
-typedef enum response_codes {
-  DNS_RCODE_NOERROR = 0,
-  DNS_RCODE_FORMERR = 1,
-  DNS_RCODE_SERVFAIL = 2,
-  DNS_RCODE_NXDOMAIN = 3,
-  DNS_RCODE_NOTIMP = 4,
-  DNS_RCODE_REFUSED = 5
-} response_codes;
-
 typedef enum DNS_types {
   DNS_TYPE_A = 1,
   DNS_TYPE_NS = 2,

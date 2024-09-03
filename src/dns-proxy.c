@@ -1,7 +1,6 @@
 #include "dns-proxy.h"
 #include "config.h" /* Main configuration file */
 
-
 static void proxy_process_request(dns_server *srv, void *cb_data,
                                   struct sockaddr *addr, uint16_t tx_id,
                                   char *dns_req, size_t dns_req_len);

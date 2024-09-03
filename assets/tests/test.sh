@@ -8,6 +8,7 @@ check_dnsperf() {
         echo "On Red Hat/CentOS: sudo yum install dnsperf"
         echo "On Fedora: sudo dnf install dnsperf"
         echo "On Arch Linux: sudo pacman -S dnsperf"
+        echo "On Nix*(package manager/OS) run nix-shell from root of the repository"
         exit 1
     else
         return
