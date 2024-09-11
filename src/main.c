@@ -11,7 +11,7 @@ HashEntry *blacklist = NULL;
 TransactionHashEntry *transactions = NULL;
 
 static void sigint_cb(struct ev_loop *loop, ev_signal *obs, int revents) {
-  fprintf(stderr, "Received SIGINT, stopping...\n");
+  fprintf(stdout, "Received SIGINT, stopping...\n");
   ev_break(loop, EVBREAK_ALL);
   server_stop(&server);
   server_cleanup(&server);
@@ -43,7 +43,7 @@ int main(void) {
 
   proxy_init(&proxy, &client, &server, loop);
 
-  printf("DNS proxy started. Press Ctrl+C to stop.\n");
+  fprintf(stdout, "DNS proxy started. Press Ctrl+C to stop.\n");
   ev_run(loop, 0);
   ev_loop_destroy(loop);
 

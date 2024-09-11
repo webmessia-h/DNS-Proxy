@@ -1,0 +1,116 @@
+[
+  {
+    "arguments": [
+      "/nix/store/yc9q0h72rlj98y0116c4mma6k80264mv-gcc-wrapper-13.2.0/bin/gcc",
+      "-I./include",
+      "-c",
+      "-I",
+      "/nix/store/dwn51bn564g27cqbd8lkd51sw0nsp2x5-libev-4.33/include",
+      "-I",
+      "/nix/store/a9fqc4l5gn0fwvqys9qylwnnmf5z155x-uthash-2.3.0/include",
+      "-I",
+      "/nix/store/4qxv05pwa7xsn8dncvvxzzvy4ch4gs86-dnsperf-2.14.0/include",
+      "-o",
+      "obj/config.o",
+      "src/config.c"
+    ],
+    "directory": "/home/webmessia-h/projects/DNS-Proxy",
+    "file": "/home/webmessia-h/projects/DNS-Proxy/src/config.c",
+    "output": "/home/webmessia-h/projects/DNS-Proxy/obj/config.o"
+  },
+  {
+    "arguments": [
+      "/nix/store/yc9q0h72rlj98y0116c4mma6k80264mv-gcc-wrapper-13.2.0/bin/gcc",
+      "-I./include",
+      "-c",
+      "-I",
+      "/nix/store/dwn51bn564g27cqbd8lkd51sw0nsp2x5-libev-4.33/include",
+      "-I",
+      "/nix/store/a9fqc4l5gn0fwvqys9qylwnnmf5z155x-uthash-2.3.0/include",
+      "-I",
+      "/nix/store/4qxv05pwa7xsn8dncvvxzzvy4ch4gs86-dnsperf-2.14.0/include",
+      "-o",
+      "obj/dns-client.o",
+      "src/dns-client.c"
+    ],
+    "directory": "/home/webmessia-h/projects/DNS-Proxy",
+    "file": "/home/webmessia-h/projects/DNS-Proxy/src/dns-client.c",
+    "output": "/home/webmessia-h/projects/DNS-Proxy/obj/dns-client.o"
+  },
+  {
+    "arguments": [
+      "/nix/store/yc9q0h72rlj98y0116c4mma6k80264mv-gcc-wrapper-13.2.0/bin/gcc",
+      "-I./include",
+      "-c",
+      "-I",
+      "/nix/store/dwn51bn564g27cqbd8lkd51sw0nsp2x5-libev-4.33/include",
+      "-I",
+      "/nix/store/a9fqc4l5gn0fwvqys9qylwnnmf5z155x-uthash-2.3.0/include",
+      "-I",
+      "/nix/store/4qxv05pwa7xsn8dncvvxzzvy4ch4gs86-dnsperf-2.14.0/include",
+      "-o",
+      "obj/dns-proxy.o",
+      "src/dns-proxy.c"
+    ],
+    "directory": "/home/webmessia-h/projects/DNS-Proxy",
+    "file": "/home/webmessia-h/projects/DNS-Proxy/src/dns-proxy.c",
+    "output": "/home/webmessia-h/projects/DNS-Proxy/obj/dns-proxy.o"
+  },
+  {
+    "arguments": [
+      "/nix/store/yc9q0h72rlj98y0116c4mma6k80264mv-gcc-wrapper-13.2.0/bin/gcc",
+      "-I./include",
+      "-c",
+      "-I",
+      "/nix/store/dwn51bn564g27cqbd8lkd51sw0nsp2x5-libev-4.33/include",
+      "-I",
+      "/nix/store/a9fqc4l5gn0fwvqys9qylwnnmf5z155x-uthash-2.3.0/include",
+      "-I",
+      "/nix/store/4qxv05pwa7xsn8dncvvxzzvy4ch4gs86-dnsperf-2.14.0/include",
+      "-o",
+      "obj/dns-server.o",
+      "src/dns-server.c"
+    ],
+    "directory": "/home/webmessia-h/projects/DNS-Proxy",
+    "file": "/home/webmessia-h/projects/DNS-Proxy/src/dns-server.c",
+    "output": "/home/webmessia-h/projects/DNS-Proxy/obj/dns-server.o"
+  },
+  {
+    "arguments": [
+      "/nix/store/yc9q0h72rlj98y0116c4mma6k80264mv-gcc-wrapper-13.2.0/bin/gcc",
+      "-I./include",
+      "-c",
+      "-I",
+      "/nix/store/dwn51bn564g27cqbd8lkd51sw0nsp2x5-libev-4.33/include",
+      "-I",
+      "/nix/store/a9fqc4l5gn0fwvqys9qylwnnmf5z155x-uthash-2.3.0/include",
+      "-I",
+      "/nix/store/4qxv05pwa7xsn8dncvvxzzvy4ch4gs86-dnsperf-2.14.0/include",
+      "-o",
+      "obj/hash.o",
+      "src/hash.c"
+    ],
+    "directory": "/home/webmessia-h/projects/DNS-Proxy",
+    "file": "/home/webmessia-h/projects/DNS-Proxy/src/hash.c",
+    "output": "/home/webmessia-h/projects/DNS-Proxy/obj/hash.o"
+  },
+  {
+    "arguments": [
+      "/nix/store/yc9q0h72rlj98y0116c4mma6k80264mv-gcc-wrapper-13.2.0/bin/gcc",
+      "-I./include",
+      "-c",
+      "-I",
+      "/nix/store/dwn51bn564g27cqbd8lkd51sw0nsp2x5-libev-4.33/include",
+      "-I",
+      "/nix/store/a9fqc4l5gn0fwvqys9qylwnnmf5z155x-uthash-2.3.0/include",
+      "-I",
+      "/nix/store/4qxv05pwa7xsn8dncvvxzzvy4ch4gs86-dnsperf-2.14.0/include",
+      "-o",
+      "obj/main.o",
+      "src/main.c"
+    ],
+    "directory": "/home/webmessia-h/projects/DNS-Proxy",
+    "file": "/home/webmessia-h/projects/DNS-Proxy/src/main.c",
+    "output": "/home/webmessia-h/projects/DNS-Proxy/obj/main.o"
+  }
+]

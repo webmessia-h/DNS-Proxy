@@ -46,6 +46,7 @@ void client_init(dns_client *client, struct ev_loop *loop, res_callback cb,
     int status = getaddrinfo(upstream_resolver[i], "53", &hints, &res);
     if (status != 0) {
       fprintf(stderr, "getaddrinfo error: %s\n", gai_strerror(status));
+      free(res);
       return;
     }
 
@@ -58,15 +59,37 @@ void client_init(dns_client *client, struct ev_loop *loop, res_callback cb,
     }
 
     int flags = fcntl(client->resolvers[i].socket, F_GETFL, 0);
-    fcntl(client->resolvers[i].socket, F_SETFL, flags | O_NONBLOCK);
+    if (flags == -1) {
+      perror("fcntl(F_GETFL) failed");
+      return;
+    }
 
-    memcpy(&client->resolvers[i].addr, res->ai_addr, res->ai_addrlen);
-    client->resolvers[i].addrlen = res->ai_addrlen;
+    if (fcntl(client->resolvers[i].socket, F_SETFL, flags | O_NONBLOCK) == -1) {
+      perror("fcntl(F_SETFL) failed");
+      return;
+    }
 
-    freeaddrinfo(res);
+    if (res->ai_addr) {
+      memcpy(&client->resolvers[i].addr, res->ai_addr, res->ai_addrlen);
+      client->resolvers[i].addrlen = res->ai_addrlen;
+    } else {
+      fprintf(stderr, "Error: Invalid address pointers for memcpy\n");
+      return;
+    }
 
-    ev_io_init(&client->resolvers[i].observer, client_receive_response,
-               client->resolvers[i].socket, EV_READ);
+    if (res) {
+      freeaddrinfo(res);
+    } else {
+      fprintf(stderr, "Error: Attempted to free a null addrinfo structure\n");
+    }
+
+    if (client->resolvers[i].socket >= 0) {
+      ev_io_init(&client->resolvers[i].observer, client_receive_response,
+                 client->resolvers[i].socket, EV_READ);
+    } else {
+      fprintf(stderr, "Error: Invalid socket for ev_io_init\n");
+    }
+
     client->resolvers[i].observer.data = client;
     ev_io_start(client->loop, &client->resolvers[i].observer);
   }
@@ -84,29 +107,6 @@ void client_send_request(dns_client *client, const char *dns_req,
   current_resolver = (current_resolver + 1) % RESOLVERS;
 
   resolver *res = &client->resolvers[current_resolver];
-  /*
-    char ip_str[INET6_ADDRSTRLEN];
-    void *addr;
-    int port;
-
-    struct sockaddr_storage *addr_storage = (struct sockaddr_storage
-    *)&res->addr;
-
-    if (addr_storage->ss_family == AF_INET) {
-      struct sockaddr_in *ipv4 = (struct sockaddr_in *)addr_storage;
-      addr = &(ipv4->sin_addr);
-      port = ntohs(ipv4->sin_port);
-    } else if (addr_storage->ss_family == AF_INET6) {
-      struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)addr_storage;
-      addr = &(ipv6->sin6_addr);
-      port = ntohs(ipv6->sin6_port);
-    } else {
-      fprintf(stderr, "Unknown address family\n");
-      return;
-    }
-
-    inet_ntop(addr_storage->ss_family, addr, ip_str, sizeof(ip_str));
-  */
   ssize_t sent = sendto(res->socket, dns_req, req_len, 0,
                         (struct sockaddr *)&res->addr, res->addrlen);
 
@@ -125,6 +125,7 @@ void client_send_request(dns_client *client, const char *dns_req,
       else
         printf("No error reported\n");
     }
+    free(res);
     return;
   }
   return;

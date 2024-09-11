@@ -45,11 +45,27 @@ static int init_socket(const char *listen_addr, int listen_port,
   freeaddrinfo(ai);
 
   if (!ok)
-    exit(errno);
+    exit(-1);
   printf("Listening on %s:%d\n", listen_addr, listen_port);
   return sockfd;
 }
 
+/**
+ * @brief Callback function for receiving DNS requests
+ *
+ * This function is called by the event loop when data is available on the
+ * server socket. It receives the DNS request, performs basic validation, and
+ * invokes the server's callback.
+ *
+ * @param loop The event loop (unused in this function)
+ * @param obs The I/O watcher object
+ * @param revents The received events (unused in this function)
+ *
+ * @note This function allocates memory for the request buffer, which is freed
+ * by the callback.
+ * @warning The function returns early on errors, freeing the buffer if
+ * necessary.
+ */
 static void server_receive_request(struct ev_loop *loop, ev_io *obs,
                                    int revents) {
 
@@ -65,12 +81,14 @@ static void server_receive_request(struct ev_loop *loop, ev_io *obs,
                          (struct sockaddr *)&raddr, &tmp_addrlen);
   if (len < 0) {
     fprintf(stderr, "Recvfrom failed: %s\n", strerror(errno));
-    free(buffer);
+    if (buffer != NULL)
+      free(buffer);
     return;
   }
   if (len < (int)sizeof(uint16_t)) {
     fprintf(stderr, "Malformed request received (too short)\n");
-    free(buffer);
+    if (buffer != NULL)
+      free(buffer);
     return;
   }
   uint16_t tx_id = ntohs(*((uint16_t *)buffer));
@@ -131,7 +149,8 @@ bool parse_domain_name(const char *dns_req, size_t dns_req_len, size_t offset,
     }
 
     if (domain_len + label_len + 2 > domain_max_len) {
-      // Domain name would exceed buffer
+      // if (log)
+      //   fprintf(stderr, "Domain name would exceed buffer\n");
       return false;
     }
 
@@ -145,7 +164,8 @@ bool parse_domain_name(const char *dns_req, size_t dns_req_len, size_t offset,
   }
 
   if (pos >= dns_req_len) {
-    // Reached end of packet without null terminator
+    // if (log)
+    //   fprintf(stderr, "Reached end of packet without null terminator\n");
     return false;
   }
 
@@ -158,6 +178,8 @@ void server_send_response(dns_server *srv, struct sockaddr *raddr, char *buffer,
   ssize_t sent = sendto(srv->sockfd, buffer, buflen, 0, raddr, srv->addrlen);
   if (sent < 0) {
     printf("sendto client failed: %s", strerror(errno));
+    if (buffer != NULL)
+      free(buffer);
   }
 }
 

@@ -5,26 +5,58 @@
 #include "dns-server.h"
 #include "include.h"
 
+/**
+ * @brief Structure representing a DNS proxy.
+ *
+ * Contains the event loop, client, server, and timeout configuration.
+ */
 typedef struct dns_proxy {
-  struct ev_loop *loop;
-  dns_client *client;
-  dns_server *server;
-  int timeout_ms;
+  struct ev_loop *loop; /**< Event loop used by the proxy. */
+  dns_client *client;   /**< Pointer to the DNS client. */
+  dns_server *server;   /**< Pointer to the DNS server. */
+  int timeout_ms;       /**< Timeout for DNS requests in milliseconds. */
 } dns_proxy;
 
-/* Initialize self with:
- * dns_server struct pointer
- * dns_client strcut pointer
- * structs must be created and initialized with dns_***_init() fn call
+/**
+ * @brief Initializes a DNS proxy.
+ *
+ * Initializes the `dns_proxy` structure with the provided DNS client, server,
+ * and event loop. The `dns_client` and `dns_server` structures must already be
+ * initialized using their respective init functions.
+ *
+ * @param prx Pointer to the dns_proxy structure to initialize.
+ * @param clt Pointer to the initialized dns_client structure.
+ * @param srv Pointer to the initialized dns_server structure.
+ * @param loop Pointer to the libev event loop (ev_loop) structure.
  */
 void proxy_init(dns_proxy *prx, dns_client *clt, dns_server *srv,
                 struct ev_loop *loop);
-/* Checks whether domain is in the blacklist and forwards upstream or returns
- * response defined in "../config.h"
+
+/**
+ * @brief Handles a DNS request.
+ *
+ * Checks if the domain is in the blacklist. If not blacklisted, the request is
+ * forwarded upstream. If the domain is blacklisted, a pre-defined response from
+ * the configuration is returned or IF the redirection flag is set changes
+ * the query to a pre-defined domain name
+ *
+ * @param prx Pointer to the dns_proxy structure.
+ * @param addr Pointer to the sockaddr structure containing the client's
+ * address.
+ * @param tx_id The transaction ID of the DNS request.
+ * @param dns_req Pointer to the DNS request packet.
+ * @param dns_req_len Length of the DNS request packet.
  */
 void proxy_handle_request(struct dns_proxy *prx, struct sockaddr *addr,
                           uint16_t tx_id, char *dns_req, size_t dns_req_len);
 
+/**
+ * @brief Stops the DNS proxy.
+ *
+ * Terminates the DNS proxy's operation and stops handling new requests.
+ *
+ * @param proxy Pointer to the dns_proxy structure to stop.
+ */
 void proxy_stop(dns_proxy *proxy);
 
 #endif // DNS_PROXY
