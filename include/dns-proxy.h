@@ -29,8 +29,8 @@ typedef struct dns_proxy {
  * @param srv Pointer to the initialized dns_server structure.
  * @param loop Pointer to the libev event loop (ev_loop) structure.
  */
-void proxy_init(dns_proxy *prx, dns_client *clt, dns_server *srv,
-                struct ev_loop *loop);
+void proxy_init(dns_proxy *restrict prx, dns_client *restrict clt,
+                dns_server *restrict srv, struct ev_loop *loop);
 
 /**
  * @brief Handles a DNS request.
@@ -47,8 +47,27 @@ void proxy_init(dns_proxy *prx, dns_client *clt, dns_server *srv,
  * @param dns_req Pointer to the DNS request packet.
  * @param dns_req_len Length of the DNS request packet.
  */
-void proxy_handle_request(struct dns_proxy *prx, struct sockaddr *addr,
-                          uint16_t tx_id, char *dns_req, size_t dns_req_len);
+void proxy_handle_request(dns_proxy *restrict prx, void *restrict data,
+                          const struct sockaddr *addr, const uint16_t tx_id,
+                          char *restrict dns_req, const size_t dns_req_len);
+/**
+ * @brief Handles a DNS response.
+ *
+ * Checks if the transaction id is present in the
+ * hash table, and if so sends the response back to client
+ * else logs the error message to stderr
+ *
+ * @param prx Pointer to the dns_proxy structure.
+ * @param addr Pointer to the sockaddr structure containing the client's
+ * address.
+ * @param tx_id The transaction ID of the DNS request.
+ * @param dns_res Pointer to the DNS response packet.
+ * @param dns_res_len Length of the DNS response packet.
+ */
+void proxy_handle_response(dns_proxy *restrict prx, void *restrict data,
+                           const struct sockaddr *addr, const uint16_t tx_id,
+                           const char *restrict dns_res,
+                           const size_t dns_res_len);
 
 /**
  * @brief Stops the DNS proxy.
@@ -57,6 +76,6 @@ void proxy_handle_request(struct dns_proxy *prx, struct sockaddr *addr,
  *
  * @param proxy Pointer to the dns_proxy structure to stop.
  */
-void proxy_stop(dns_proxy *proxy);
+void proxy_stop(const dns_proxy *restrict proxy);
 
 #endif // DNS_PROXY

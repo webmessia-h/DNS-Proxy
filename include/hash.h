@@ -2,12 +2,12 @@
 #define HASH_H
 #include "config.h"
 #include "include.h"
-#include "uthash.h"
+#include <uthash.h>
 
 typedef struct {
   char *key;
   UT_hash_handle hh; // makes this structure hashable
-} HashEntry;
+} hash_entry;
 
 #pragma pack(push, 1)
 typedef struct transaction_info {
@@ -21,10 +21,10 @@ typedef struct {
   uint16_t key;
   transaction_info *value;
   UT_hash_handle hh; // makes this structure hashable
-} TransactionHashEntry;
+} transaction_hash_entry;
 
-extern HashEntry *blacklist;
-extern TransactionHashEntry *transactions;
+extern hash_entry *blacklist;
+extern transaction_hash_entry *transactions;
 
 void add_blacklist_entry(const char *key);
 int find(const char *key);

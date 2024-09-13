@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <ev.h>
+#include <fcntl.h>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <stdbool.h>
@@ -14,6 +15,4 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <stdio.h>
-#include <fcntl.h>
-#endif
+#endif // PRECOMP_HEADER

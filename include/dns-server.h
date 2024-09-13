@@ -38,21 +38,21 @@ struct dns_server;
 /**
  * @brief Callback function type for DNS requests
  */
-typedef void (*req_callback)(struct dns_server *dns, void *data,
-                             struct sockaddr *addr, uint16_t tx_id,
-                             char *dns_req, size_t dns_req_len);
+typedef void (*req_callback)(void *restrict srv, void *restrict data,
+                             const struct sockaddr *addr, const uint16_t tx_id,
+                             char *restrict dns_req, const size_t dns_req_len);
 
 /**
  * @brief DNS server structure
  */
 typedef struct dns_server {
-  struct ev_loop *loop; /**< Event loop */
-  void *cb_data;        /**< Additional data for callback */
-  req_callback cb;      /**< Callback function */
-  int sockfd;           /**< Socket file descriptor */
-  socklen_t addrlen;    /**< Address length */
-  ev_io observer;       /**< Event loop observer */
-  HashEntry *blacklist; /**< Blacklist */
+  struct ev_loop *loop;        /**< Event loop */
+  void *cb_data;               /**< Additional data for callback */
+  req_callback cb;             /**< Callback function */
+  int sockfd;                  /**< Socket file descriptor */
+  socklen_t addrlen;           /**< Address length */
+  ev_io observer;              /**< Event loop observer */
+  const hash_entry *blacklist; /**< Blacklist */
 } dns_server;
 
 /**
@@ -65,16 +65,17 @@ typedef struct dns_server {
  * @param data User-defined data
  * @param map Blacklist hash map
  */
-void server_init(dns_server *srv, struct ev_loop *loop, req_callback cb,
-                 const char *listen_addr, int listen_port, void *data,
-                 HashEntry *map);
+void server_init(dns_server *restrict srv, struct ev_loop *loop,
+                 req_callback cb, const char *restrict listen_addr,
+                 const int listen_port, void *restrict data,
+                 const hash_entry *restrict map);
 
 /**
  * @brief Check if a domain is blacklisted
  * @param domain Domain name to check
  * @return true if blacklisted, false otherwise
  */
-bool is_blacklisted(const char *domain);
+bool is_blacklisted(const char *restrict domain);
 
 /**
  * @brief Parse a domain name from a DNS request
@@ -85,8 +86,9 @@ bool is_blacklisted(const char *domain);
  * @param domain_max_len Maximum length of domain buffer
  * @return true if parsing successful, false otherwise
  */
-bool parse_domain_name(const char *dns_req, size_t dns_req_len, size_t offset,
-                       char *domain, size_t domain_max_len);
+bool parse_domain_name(const char *restrict dns_req, const size_t dns_req_len,
+                       const size_t offset, char *restrict domain,
+                       const size_t domain_max_len);
 
 /**
  * @brief Send a DNS response
@@ -95,19 +97,20 @@ bool parse_domain_name(const char *dns_req, size_t dns_req_len, size_t offset,
  * @param buffer Response buffer
  * @param buflen Length of response buffer
  */
-void server_send_response(dns_server *srv, struct sockaddr *raddr, char *buffer,
-                          size_t buflen);
+void server_send_response(const dns_server *restrict srv,
+                          const struct sockaddr *raddr,
+                          const char *restrict buffer, const size_t buflen);
 
 /**
  * @brief Stop the event loop
  * @param srv Pointer to dns_server struct
  */
-void server_stop(dns_server *srv);
+void server_stop(dns_server *restrict srv);
 
 /**
  * @brief Clean up server resources
  * @param srv Pointer to dns_server struct
  */
-void server_cleanup(dns_server *srv);
+void server_cleanup(const dns_server *restrict srv);
 
 #endif // SERVER_H

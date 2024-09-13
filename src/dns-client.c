@@ -1,12 +1,14 @@
 #include "dns-client.h"
 #include "config.h" /* Main configuration file */
-
+#include "log.h"
 static void client_receive_response(struct ev_loop *loop, ev_io *obs,
                                     int revents) {
+  LOG_DEBUG("client_receive_response(loop ptr: %p, obs ptr: %p, revents: %d)",
+            loop, obs, revents);
   dns_client *client = (dns_client *)obs->data;
   char *buffer = (char *)calloc(1, REQUEST_MAX + 1);
   if (buffer == NULL) {
-    fprintf(stderr, "Failed buffer allocation\n");
+    LOG_ERROR("Failed buffer allocation\n");
     return;
   }
   struct sockaddr_storage saddr;
@@ -16,22 +18,29 @@ static void client_receive_response(struct ev_loop *loop, ev_io *obs,
                          (struct sockaddr *)&saddr, &src_addrlen);
 
   if (len < 0) {
-    fprintf(stderr, "Recvfrom failed: %s\n", strerror(errno));
+    LOG_ERROR("Recvfrom failed: %s\n", strerror(errno));
     free(buffer);
     return;
   }
   if (len < (int)sizeof(uint16_t)) {
-    fprintf(stderr, "Malformed response received (too short)\n");
+    LOG_ERROR("Malformed response received (too short) len: %zu\n", len);
     free(buffer);
     return;
   }
 
   uint16_t tx_id = ntohs(*((uint16_t *)buffer));
-  client->cb(client->cb_data, (struct sockaddr *)&saddr, buffer, len, tx_id);
+  client->cb((void *)client, client->cb_data, (struct sockaddr *)&saddr, tx_id,
+             buffer, len);
 }
 
-void client_init(dns_client *client, struct ev_loop *loop, res_callback cb,
-                 void *data, TransactionHashEntry *transactions) {
+void client_init(dns_client *restrict client, struct ev_loop *loop,
+                 res_callback cb, void *restrict data,
+                 transaction_hash_entry *restrict transactions) {
+  LOG_DEBUG(
+      "client_init(client ptr: %p, loop ptr: %p, cb ptr: %p, data ptr: %p, "
+      "transactions ptr: %p)\n",
+      client, loop, cb, data, transactions);
+
   client->loop = loop;
   client->cb = cb;
   client->cb_data = data;
@@ -45,7 +54,7 @@ void client_init(dns_client *client, struct ev_loop *loop, res_callback cb,
 
     int status = getaddrinfo(upstream_resolver[i], "53", &hints, &res);
     if (status != 0) {
-      fprintf(stderr, "getaddrinfo error: %s\n", gai_strerror(status));
+      LOG_ERROR("getaddrinfo error: %s\n", strerror(status));
       free(res);
       return;
     }
@@ -53,19 +62,19 @@ void client_init(dns_client *client, struct ev_loop *loop, res_callback cb,
     client->resolvers[i].socket =
         socket(res->ai_family, res->ai_socktype, res->ai_protocol);
     if (client->resolvers[i].socket < 0) {
-      perror("Error creating socket");
+      LOG_ERROR("Error creating socket\n");
       freeaddrinfo(res);
       return;
     }
 
     int flags = fcntl(client->resolvers[i].socket, F_GETFL, 0);
     if (flags == -1) {
-      perror("fcntl(F_GETFL) failed");
+      LOG_ERROR("fcntl(F_GETFL) failed\n");
       return;
     }
 
     if (fcntl(client->resolvers[i].socket, F_SETFL, flags | O_NONBLOCK) == -1) {
-      perror("fcntl(F_SETFL) failed");
+      LOG_ERROR("fcntl(F_SETFL) failed\n");
       return;
     }
 
@@ -73,21 +82,21 @@ void client_init(dns_client *client, struct ev_loop *loop, res_callback cb,
       memcpy(&client->resolvers[i].addr, res->ai_addr, res->ai_addrlen);
       client->resolvers[i].addrlen = res->ai_addrlen;
     } else {
-      fprintf(stderr, "Error: Invalid address pointers for memcpy\n");
+      LOG_ERROR("Invalid address pointers for memcpy\n");
       return;
     }
 
     if (res) {
       freeaddrinfo(res);
     } else {
-      fprintf(stderr, "Error: Attempted to free a null addrinfo structure\n");
+      LOG_ERROR("Attempted to free a null addrinfo structure\n");
     }
 
     if (client->resolvers[i].socket >= 0) {
       ev_io_init(&client->resolvers[i].observer, client_receive_response,
                  client->resolvers[i].socket, EV_READ);
     } else {
-      fprintf(stderr, "Error: Invalid socket for ev_io_init\n");
+      LOG_ERROR("Error: Invalid socket for ev_io_init\n");
     }
 
     client->resolvers[i].observer.data = client;
@@ -97,10 +106,15 @@ void client_init(dns_client *client, struct ev_loop *loop, res_callback cb,
   return;
 }
 
-void client_send_request(dns_client *client, const char *dns_req,
-                         size_t req_len, uint16_t tx_id) {
-  if (sizeof(upstream_resolver) == 0)
-    return;
+void client_send_request(dns_client *restrict client,
+                         const char *restrict dns_req, const size_t req_len,
+                         const uint16_t tx_id) {
+  LOG_DEBUG("client_send_request(client ptr: %p, dns_req ptr: %p, req_len: "
+            "%zu, tx_id: %u)",
+            client, dns_req, req_len, tx_id);
+  if (sizeof(upstream_resolver) == 0) {
+    LOG_ERROR("sizeof upstream_resolver == 0\n");
+  }
 
   // Simple round-robin selection of upstream resolver
   static int current_resolver = 0;
@@ -111,19 +125,19 @@ void client_send_request(dns_client *client, const char *dns_req,
                         (struct sockaddr *)&res->addr, res->addrlen);
 
   if (sent < 0) {
-    printf("sendto resolver failed: %s\n", strerror(errno));
+    LOG_ERROR("sendto resolver failed: %s\n", strerror(errno));
 
     // Additional error checking
     if (errno == EDESTADDRREQ) {
-      printf("Socket state: ");
+      LOG_ERROR("Socket failure state: ");
       int error = 0;
       socklen_t len = sizeof(error);
       if (getsockopt(res->socket, SOL_SOCKET, SO_ERROR, &error, &len) < 0)
-        printf("Unable to get socket error\n");
+        LOG_ERROR("Unable to get socket error\n");
       else if (error != 0)
-        printf("Socket error: %s\n", strerror(error));
+        LOG_ERROR("Socket error: %s\n", strerror(error));
       else
-        printf("No error reported\n");
+        LOG_ERROR("No error reported\n");
     }
     free(res);
     return;
@@ -131,7 +145,8 @@ void client_send_request(dns_client *client, const char *dns_req,
   return;
 }
 
-void client_cleanup(dns_client *client) {
+void client_cleanup(dns_client *restrict client) {
+  LOG_DEBUG("client_cleanup(client ptr: %p)\n", client);
   for (int i = 0; i < RESOLVERS; i++) {
     ev_io_stop(client->loop, &client->resolvers[i].observer);
     close(client->resolvers[i].socket);
