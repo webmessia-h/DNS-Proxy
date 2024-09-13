@@ -1,13 +1,16 @@
 #include "dns-server.h"
 #include "config.h" /* Main configuration file */
 #include "log.h"
+#include "unistd.h"
+#include <stdint.h>
 
 // Creates and bind a listening UDP socket for incoming requests.
 static inline int init_socket(const char *restrict listen_addr,
-                              const int listen_port,
+                              const uint16_t listen_port,
                               unsigned int *restrict addrlen) {
   LOG_DEBUG("init_socket(listen_addr: %s, listen_port: %d, addrlen ptr: %p)\n",
             listen_addr, listen_port, addrlen);
+
   struct addrinfo *ai = NULL;
   struct addrinfo hints;
   bool ok = true;
@@ -39,8 +42,8 @@ static inline int init_socket(const char *restrict listen_addr,
 
   res = bind(sockfd, ai->ai_addr, ai->ai_addrlen);
   if (res < 0) {
-    LOG_FATAL("Error binding %s:%d: %s (%d)\n", listen_addr, listen_port,
-              strerror(errno), res);
+    LOG_FATAL("Error binding socket %s:%du: %s (%d)\n", listen_addr,
+              listen_port, strerror(errno), res);
     close(sockfd);
     freeaddrinfo(ai);
     ok = false;
@@ -103,7 +106,7 @@ static void server_receive_request(struct ev_loop *loop, ev_io *obs,
 
 void server_init(dns_server *restrict srv, struct ev_loop *loop,
                  req_callback cb, const char *restrict listen_addr,
-                 const int listen_port, void *restrict data,
+                 const uint16_t listen_port, void *restrict data,
                  const hash_entry *restrict blacklist) {
   LOG_DEBUG(
       "server_init(srv ptr: %p, loop ptr: %p, cb ptr: %p, listen_addr: %s, "

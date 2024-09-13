@@ -35,19 +35,28 @@ int main(void) {
   loop = EV_DEFAULT;
   options_init(&opts);
   populate_blacklist();
-  log_set_level(LOG_LEVEL_ERROR);
+  log_set_level(LOG_LEVEL_INFO);
 
   ev_signal signal_observer;
   ev_signal_init(&signal_observer, sigint_cb, SIGINT);
   ev_signal_start(loop, &signal_observer);
 
+  if (getuid() != 0) {
+    LOG_WARN("Running without sudo privileges port will be changed to "
+             "fallback: %d\n",
+             opts.fallback_port);
+    opts.listen_port = opts.fallback_port;
+  }
+
   server_init(&server, loop, NULL, opts.listen_addr, opts.listen_port, NULL,
               blacklist);
+
   client_init(&client, loop, NULL, upstream_resolver, transactions);
 
   proxy_init(&proxy, &client, &server, loop);
 
-  LOG_INFO("DNS proxy started. Press Ctrl+C to stop.\n");
+  LOG_INFO("DNS proxy started at %s:%d. Press Ctrl+C to stop.\n",
+           opts.listen_addr, opts.listen_port);
   ev_run(loop, 0);
   ev_loop_destroy(loop);
 

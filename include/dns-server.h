@@ -3,6 +3,7 @@
 
 #include "hash.h"
 #include "include.h"
+#include <stdint.h>
 
 #pragma pack(push, 1)
 /**
@@ -62,12 +63,13 @@ typedef struct dns_server {
  * @param cb Callback function for requests
  * @param listen_addr Listen address
  * @param listen_port Listen port
+ * @param fallback_port Fallback port
  * @param data User-defined data
  * @param map Blacklist hash map
  */
 void server_init(dns_server *restrict srv, struct ev_loop *loop,
                  req_callback cb, const char *restrict listen_addr,
-                 const int listen_port, void *restrict data,
+                 const uint16_t listen_port, void *restrict data,
                  const hash_entry *restrict map);
 
 /**

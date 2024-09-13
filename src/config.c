@@ -5,6 +5,7 @@ void options_init(struct options *opts) {
   LOG_DEBUG("options_init(opts ptr: %p)\n", opts);
   opts->listen_addr = "127.0.0.1";
   opts->listen_port = 53;
+  opts->fallback_port = 5353;
 }
 
 /* IF YOU WANT TO ADD ANY RESOLVER OR DOMAINS(TO BLACKLIST) THEN YOU MUST CHANGE

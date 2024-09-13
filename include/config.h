@@ -30,6 +30,7 @@ enum {
 typedef struct options {
   const char *listen_addr;
   uint16_t listen_port;
+  uint16_t fallback_port;
   uint8_t BLACKLISTED_RESPONSE;
 } options;
 
