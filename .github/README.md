@@ -130,8 +130,7 @@ The project has been tested with dnsperf for performance evaluation.
 
 ### Below is a benchmark result of the DNS proxy using`dnsperf`:
 
-> [!IMPORTANT] >
-> `NXDOMAIN` is a blacklisted response, can be configured to another response type
+> [!IMPORTANT] > `NXDOMAIN` is a blacklisted response, can be configured to another response type
 
 #### Testing conditions can be found in default config, but I'll duplicate them here:
 
