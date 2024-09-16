@@ -64,7 +64,7 @@ graph TD
 ## Configuring
 
 > [!IMPORTANT]
-> To configure DNS Proxy refer to ../src/config.c and ../include/config.h
+> To configure DNS Proxy refer to [config.c](../src/config.c) and [config.h](../include/config.h)
 
 Configuration includes:
 
@@ -76,6 +76,7 @@ Configuration includes:
 - Logger level (FATAL,ERROR,WARN,INFO,DEBUG,TRACE)
 - Constants for:
   > Average/max for: domain name, request, response.
+  >
   > DNS response codes.
 
 ## Building and Running
