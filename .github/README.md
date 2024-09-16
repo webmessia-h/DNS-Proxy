@@ -15,6 +15,21 @@ This DNS proxy server is designed to provide high-performance DNS request handli
 > - libev
 > - uthash
 
+# Table of Contents
+
+1. [Installing Dependencies](#installing-dependencies)
+   - [On Linux](#on-linux)
+   - [Nix OS/package manager](#nix-ospackage-manager)
+   - [On macOS (using Homebrew)](#on-macos-using-homebrew)
+2. [Workflow](#workflow)
+3. [Configuring](#configuring)
+4. [Building and Running](#building-and-running)
+5. [Testing](#testing)
+6. [Benchmark](#benchmark)
+   - [Testing conditions](#testing)
+   - [In virtual environment](#in-virtual-environment)
+   - [On native Linux x86_64](#on-native-linux-x86_64)
+
 ### Installing Dependencies
 
 #### On Linux:
@@ -35,7 +50,7 @@ nix-shell # includes libraries and dnsperf for testing
 
 #### On macOS (using Homebrew):
 
-```bash
+```sh
 brew install libev
 brew install uthash
 ```
@@ -75,9 +90,8 @@ Configuration includes:
 - Proxy address & port
 - Logger level (FATAL,ERROR,WARN,INFO,DEBUG,TRACE)
 - Constants for:
-  > Average/max for: domain name, request, response.
-  >
-  > DNS response codes.
+  - Average/max sizes for: domain name, request, response.
+  - DNS response codes.
 
 ## Building and Running
 
@@ -114,32 +128,36 @@ The project has been tested with dnsperf for performance evaluation.
 
 ## Benchmark
 
-### Below is a benchmark result of the DNS proxy using `valgrind` and `dnsperf`:
+### Below is a benchmark result of the DNS proxy using`dnsperf`:
 
-> [!IMPORTANT] > `NXDOMAIN` is a blacklisted response, can be configured to another response type
->
-> #### Testing conditions can be found in default config, but I'll duplicate them here:
->
-> #### `valgrind  --leak-check=full --show-leak-kinds=all ./dns-proxy --debug `
->
-> #### `dnsperf` acting as 4 clients, using 4 threads, sending queries to:
->
-> > ```plaintext
-> > github.com
-> > microsoft.com - blacklisted
-> > google.com - blacklisted
-> > youtube.com
-> > torproject.org
-> > ```
->
-> #### for 10 minutes with `REDIRECT` flag set to 0.
->
-> #### Upstream resolvers used in test (all at once):
->
-> > ```plaintext
-> > 8.8.8.8
-> > 1.1.1.1
-> > 8.8.4.4
-> > ```
+> [!IMPORTANT] >
+> `NXDOMAIN` is a blacklisted response, can be configured to another response type
 
-![Benchmark Results](assets/benchmark/test.png)
+#### Testing conditions can be found in default config, but I'll duplicate them here:
+
+#### `dnsperf` acting as 4 clients, 5 seconds query timeout, `REDIRECT` flag set to 0, sending queries to:
+
+```plaintext
+microsoft.com - blacklisted
+google.com - blacklisted
+youtube.com - blacklisted
+github.com
+torproject.org
+facebook.com
+```
+
+#### Upstream resolvers used in test (all at once):
+
+```plaintext
+8.8.8.8
+9.9.9.9
+8.8.4.4
+```
+
+### In **_virtual environment_**, e.g. `WSL`:
+
+![Benchmark result](../.github/wsl.png)
+
+### On **_native_** Linux x86_64
+
+![Benchmark result](../.github/test.png)
