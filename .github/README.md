@@ -61,6 +61,23 @@ graph TD
     B -->|Response| A
 ```
 
+## Configuring
+
+> [!IMPORTANT]
+> To configure DNS Proxy refer to ../src/config.c and ../include/config.h
+
+Configuration includes:
+
+- Blacklisted domain names
+- Default response for query with blacklisted domain name
+- Upstream DNS resolvers
+- Redirection
+- Proxy address & port
+- Logger level (FATAL,ERROR,WARN,INFO,DEBUG,TRACE)
+- Constants for:
+  > Average/max for: domain name, request, response.
+  > DNS response codes.
+
 ## Building and Running
 
 To build the project:
@@ -69,13 +86,12 @@ To build the project:
 make -j($nproc)
 ```
 
-> [!IMPORTANT]
-> To configure DNS Proxy refer to config.c and include/config.h
-
 To run the DNS proxy:
 
 ```sh
-sudo ./dns-proxy
+sudo ./dns-proxy # uses port 53
+# or
+./dns-proxy # uses fallback port 5353
 ```
 
 ## Testing
@@ -103,7 +119,7 @@ The project has been tested with dnsperf for performance evaluation.
 >
 > #### Testing conditions can be found in default config, but I'll duplicate them here:
 >
-> ##### `valgrind G_SLICE=always-malloc valgrind -s --leak-check=full --show-leak-kinds=all ./dns-proxy --debug `
+> #### `valgrind  --leak-check=full --show-leak-kinds=all ./dns-proxy --debug `
 >
 > #### `dnsperf` acting as 4 clients, using 4 threads, sending queries to:
 >

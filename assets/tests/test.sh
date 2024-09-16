@@ -20,4 +20,4 @@ check_dnsperf
 # sends queries from queries.txt to standart address for 60 seconds
 # acting like 4 clients and using 4 threads
 # verbose, shows warnings
-dnsperf -s 127.0.0.1 -p 53 -d queries.txt -l 60  -Q 20000 -t 1 -T 4 -c 4 -b 40 -q 1000 -v -W 
+dnsperf -s 127.0.0.1 -p 53 -d queries.txt -l 60  -Q 20000 -t 5 -T 2 -c 100 -b 4096 -q 1000 -W

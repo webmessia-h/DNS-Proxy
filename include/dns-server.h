@@ -3,7 +3,6 @@
 
 #include "hash.h"
 #include "include.h"
-#include <stdint.h>
 
 #pragma pack(push, 1)
 /**

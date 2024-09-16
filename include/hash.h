@@ -2,6 +2,7 @@
 #define HASH_H
 #include "config.h"
 #include "include.h"
+#include <time.h>
 #include <uthash.h>
 
 typedef struct {
@@ -14,6 +15,7 @@ typedef struct transaction_info {
   uint16_t original_tx_id;
   struct sockaddr client_addr;
   socklen_t client_addr_len;
+  time_t timestamp;
 } transaction_info;
 #pragma pack(pop)
 
@@ -28,10 +30,10 @@ extern transaction_hash_entry *transactions;
 
 void add_blacklist_entry(const char *key);
 int find(const char *key);
-void delete_blacklist();
+void delete_blacklist(void);
 void add_transaction_entry(transaction_info *tx);
 transaction_info *find_transaction(uint16_t tx_id);
 void delete_transaction(uint16_t tx_id);
-void delete_all_transactions();
+void delete_all_transactions(void);
 
 #endif // HASH_H

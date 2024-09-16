@@ -14,7 +14,6 @@ typedef struct dns_proxy {
   struct ev_loop *loop; /**< Event loop used by the proxy. */
   dns_client *client;   /**< Pointer to the DNS client. */
   dns_server *server;   /**< Pointer to the DNS server. */
-  int timeout_ms;       /**< Timeout for DNS requests in milliseconds. */
 } dns_proxy;
 
 /**

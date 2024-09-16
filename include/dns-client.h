@@ -43,7 +43,7 @@ typedef struct dns_client {
       *transactions;         /**< Hash table of ongoing transactions */
   ev_io observer;            /**< Event loop I/O watcher */
   ev_timer timeout_observer; /**< Event loop timer for timeouts */
-  int timeout_ms;            /**< Timeout in milliseconds */
+  double timeout_s;          /**< Timeout in seconds */
 } dns_client;
 
 /**

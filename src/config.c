@@ -2,7 +2,8 @@
 #include "log.h"
 
 void options_init(struct options *opts) {
-  LOG_DEBUG("options_init(opts ptr: %p)\n", opts);
+  log_set_level(LOG_LEVEL_INFO);
+  LOG_TRACE("options_init(opts ptr: %p)\n", opts);
   opts->listen_addr = "127.0.0.1";
   opts->listen_port = 53;
   opts->fallback_port = 5353;
@@ -10,25 +11,18 @@ void options_init(struct options *opts) {
 
 /* IF YOU WANT TO ADD ANY RESOLVER OR DOMAINS(TO BLACKLIST) THEN YOU MUST CHANGE
  * CORRESPONDING DEFINE'S IN THE ../include/config.h otherwise will cause
- * SIGSEGV
+ * segmentation fault
  */
-const char *upstream_resolver[] = {"8.8.8.8", "1.1.1.1", "8.8.4.4"};
-const char *BLACKLIST[] = {"microsoft.com", "google.com", "example.com",
-                           "youtube.com"};
+const char *upstream_resolver[] = {"8.8.8.8", "8.8.4.4",
+                                   "9.9.9.9"}; //, "9.9.9.9"};
+const char *BLACKLIST[] = {
+    "youtube.com",
+    "google.com",
+    "microsoft.com",
+};
 
-enum {
-  NOERROR = 0,
-  FORMERR = 1,
-  SERVFAIL = 2,
-  NXDOMAIN = 3,
-  NOTIMP = 4,
-  REFUSED = 5,
-  YXDOMAIN = 6,
-  XRRSET = 7,
-  NOTAUTH = 8,
-  NOTZONE = 9
-}; // DNS response codes
 const uint8_t BLACKLISTED_RESPONSE = NXDOMAIN;
+
 // you must provide redirect domain name in format: "\x07example\x03com\x00"
 // (length of fist label, second label and null terminator in HEX, conversion
 // table below)

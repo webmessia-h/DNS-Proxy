@@ -11,7 +11,7 @@ hash_entry *blacklist = NULL;
 transaction_hash_entry *transactions = NULL;
 
 static void sigint_cb(struct ev_loop *loop, ev_signal *obs, int revents) {
-  LOG_DEBUG("sigint_cb(loop ptr: %p, obs ptr: %p, revents: %d)\n", loop, obs,
+  LOG_TRACE("sigint_cb(loop ptr: %p, obs ptr: %p, revents: %d)\n", loop, obs,
             revents);
   LOG_INFO("Received SIGINT, stopping...\n");
   ev_break(loop, EVBREAK_ALL);
@@ -24,7 +24,7 @@ static void sigint_cb(struct ev_loop *loop, ev_signal *obs, int revents) {
 }
 
 static void populate_blacklist(void) {
-  LOG_DEBUG("populate_blacklist(void)\n");
+  LOG_TRACE("populate_blacklist(void)\n");
   for (int i = 0; i < BLACKLISTED_DOMAINS; i++) {
     add_blacklist_entry(BLACKLIST[i]);
   }
@@ -35,7 +35,6 @@ int main(void) {
   loop = EV_DEFAULT;
   options_init(&opts);
   populate_blacklist();
-  log_set_level(LOG_LEVEL_INFO);
 
   ev_signal signal_observer;
   ev_signal_init(&signal_observer, sigint_cb, SIGINT);
