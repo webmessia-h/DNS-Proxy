@@ -39,8 +39,9 @@ sudo *your package manager* *update*
 sudo *your package manager* libev-dev uthash-dev
 ```
 
-uthash is a header-only library.
-You can download it from [Troy D. Hanson's repository](https://github.com/troydhanson/uthash) if you want.
+> [!Info]
+> uthash is a header-only library.
+> You can download it from [Troy D. Hanson's repository](https://github.com/troydhanson/uthash) if you want.
 
 #### Nix\* OS/package manager:
 
@@ -78,7 +79,7 @@ graph TD
 
 ## Configuring
 
-> [!IMPORTANT]
+> [!INFO]
 > To configure DNS Proxy refer to [config.c](../src/config.c) and [config.h](../include/config.h)
 
 Configuration includes:
@@ -98,7 +99,7 @@ Configuration includes:
 To build the project:
 
 ```sh
-make -j($nproc)
+make
 ```
 
 To run the DNS proxy:
@@ -111,7 +112,9 @@ sudo ./dns-proxy # uses port 53
 
 ## Testing
 
-This project includes a test script which uses `dnsperf`, it is located at `assets/tests/test.sh`. Before running the test, you need to give it execution permission:
+> [!Info]
+> This project includes a [test script](../assets/tests/test.sh) which uses `dnsperf`,
+> Before running the test, you need to give it execution permission:
 
 ```sh
 chmod +x assets/tests/test.sh
@@ -119,44 +122,45 @@ chmod +x assets/tests/test.sh
 
 Then you can run the test:
 
+> [!CAUTION]
+> The test default port is 53, which is assigned only if you run `sudo ./dns-proxy`
+> If you want to run in non-privileged mode and still perform test, you must change
+> Port value in [test.sh](../assets/tests/test.sh) to `5353` (fallback port)
+
 ```sh
 cd assets/tests/
 ./test.sh
 ```
 
-The project has been tested with dnsperf for performance evaluation.
-
 ## Benchmark
 
-### Below is a benchmark result of the DNS proxy using`dnsperf`:
+### Below is a benchmark result of the DNS proxy using `dnsperf`:
 
-> [!IMPORTANT] > `NXDOMAIN` is a blacklisted response, can be configured to another response type
-
-#### Testing conditions can be found in default config, but I'll duplicate them here:
-
-#### `dnsperf` acting as 4 clients, 5 seconds query timeout, `REDIRECT` flag set to 0, sending queries to:
-
-```plaintext
-microsoft.com - blacklisted
-google.com - blacklisted
-youtube.com - blacklisted
-github.com
-torproject.org
-facebook.com
-```
-
-#### Upstream resolvers used in test (all at once):
-
-```plaintext
-8.8.8.8
-9.9.9.9
-8.8.4.4
-```
+> [!INFO]
+> The `NXDOMAIN` is a blacklisted response, can be configured to another response code.
+>
+> Testing conditions can be found in default [config](../src/config.c) values, but I'll duplicate them here:
+>
+> `dnsperf` acting as 4 clients, 5 seconds query timeout, `REDIRECT` flag set to 0,
+> sending queries to:
+>
+> ```plaintext
+> microsoft.com - blacklisted
+> google.com - blacklisted
+> youtube.com - blacklisted
+> github.com
+> torproject.org
+> facebook.com
+> ```
+>
+> Upstream resolvers used in test (all at once):
+>
+> ```plaintext
+> 8.8.8.8
+> 9.9.9.9
+> 8.8.4.4
+> ```
 
 ### In **_virtual environment_**, e.g. `WSL`:
 
 ![Benchmark result](../.github/wsl.png)
-
-### On **_native_** Linux x86_64
-
-![Benchmark result](../.github/test.png)
