@@ -9,7 +9,7 @@ A high-performance DNS proxy server implemented in C.
 
 This DNS proxy server is designed to provide high-performance DNS request handling with features such as blacklisting and request redirection. It uses libev for efficient event handling and uthash for fast hash table operations.
 
-> [!CAUTION]
+> [!NOTE]
 > This project depends on the following libraries:
 >
 > - libev
@@ -28,7 +28,6 @@ This DNS proxy server is designed to provide high-performance DNS request handli
 6. [Benchmark](#benchmark)
    - [Testing conditions](#testing)
    - [In virtual environment](#in-virtual-environment)
-   - [On native Linux x86_64](#on-native-linux-x86_64)
 
 ### Installing Dependencies
 
@@ -39,7 +38,7 @@ sudo *your package manager* *update*
 sudo *your package manager* libev-dev uthash-dev
 ```
 
-> [!Info]
+> [!NOTE]
 > uthash is a header-only library.
 > You can download it from [Troy D. Hanson's repository](https://github.com/troydhanson/uthash) if you want.
 
@@ -79,7 +78,7 @@ graph TD
 
 ## Configuring
 
-> [!INFO]
+> [!NOTE]
 > To configure DNS Proxy refer to [config.c](../src/config.c) and [config.h](../include/config.h)
 
 Configuration includes:
@@ -112,7 +111,7 @@ sudo ./dns-proxy # uses port 53
 
 ## Testing
 
-> [!Info]
+> [!NOTE]
 > This project includes a [test script](../assets/tests/test.sh) which uses `dnsperf`,
 > Before running the test, you need to give it execution permission:
 
@@ -122,7 +121,7 @@ chmod +x assets/tests/test.sh
 
 Then you can run the test:
 
-> [!CAUTION]
+> [!WARNING]
 > The test default port is 53, which is assigned only if you run `sudo ./dns-proxy`
 > If you want to run in non-privileged mode and still perform test, you must change
 > Port value in [test.sh](../assets/tests/test.sh) to `5353` (fallback port)
@@ -136,7 +135,7 @@ cd assets/tests/
 
 ### Below is a benchmark result of the DNS proxy using `dnsperf`:
 
-> [!INFO]
+> [!NOTE]
 > The `NXDOMAIN` is a blacklisted response, can be configured to another response code.
 >
 > Testing conditions can be found in default [config](../src/config.c) values, but I'll duplicate them here:
