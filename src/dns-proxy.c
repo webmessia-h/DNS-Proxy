@@ -7,7 +7,7 @@ inline void proxy_init(dns_proxy *restrict prx, dns_client *restrict clt,
 
 void proxy_stop(const dns_proxy *restrict prx);
 
-void proxy_handle_request(dns_proxy *restrict prx, void *restrict data,
+void proxy_handle_request(void *restrict prx, void *restrict data,
                           const struct sockaddr *addr, const uint16_t tx_id,
                           char *restrict dns_req, const size_t dns_req_len);
 
@@ -27,7 +27,7 @@ static inline void forward_request(const dns_proxy *prx,
                                    const uint16_t tx_id, const char *dns_req,
                                    const size_t dns_req_len);
 
-void proxy_handle_response(dns_proxy *restrict prx, void *restrict data,
+void proxy_handle_response(void *restrict prx, void *restrict data,
                            const struct sockaddr *addr, const uint16_t tx_id,
                            const char *restrict dns_res,
                            const size_t dns_res_len);
@@ -83,7 +83,7 @@ void proxy_stop(const dns_proxy *restrict prx) {
  * @param dns_req Buffer containing the DNS request
  * @param dns_req_len Length of the DNS request buffer
  */
-void proxy_handle_request(dns_proxy *restrict prx, void *restrict data,
+void proxy_handle_request(void *restrict prx, void *restrict data,
                           const struct sockaddr *addr, const uint16_t tx_id,
                           char *dns_req, const size_t dns_req_len) {
   LOG_TRACE("proxy_handle_request(prx ptr: %p, data ptr: %p, addr ptr: %p, "
@@ -108,15 +108,15 @@ void proxy_handle_request(dns_proxy *restrict prx, void *restrict data,
   }
 }
 
-void proxy_handle_response(dns_proxy *prx, void *data,
-                           const struct sockaddr *addr, const uint16_t tx_id,
-                           const char *dns_res, const size_t dns_res_len) {
-  LOG_TRACE("proxy_handle_response(prx ptr: %p, data ptr: %p, addr ptr: %p, "
+void proxy_handle_response(void *srv, void *data, const struct sockaddr *addr,
+                           const uint16_t tx_id, const char *dns_res,
+                           const size_t dns_res_len) {
+  LOG_TRACE("proxy_handle_response(srv ptr: %p, data ptr: %p, addr ptr: %p, "
             "tx_id: %u, "
             "dns_res ptr: %p, dns_res_len: %zu)\n",
-            prx, data, addr, tx_id, dns_res, dns_res_len);
+            data, data, addr, tx_id, dns_res, dns_res_len);
   // WARN:
-  prx = (dns_proxy *)data;
+  dns_proxy *prx = (dns_proxy *)data;
 
   transaction_info *current = find_transaction(tx_id);
   if (current != NULL) {
@@ -191,7 +191,6 @@ static inline char *create_redirect_packet(char *dns_req,
   }
   // Copy the DNS header from the request to the redirect
   memcpy(redir, dns_req, sizeof(*header));
-  dns_header *redir_header = (dns_header *)redir;
 
   // Copy the question section from redirect_to string
   size_t redir_query_offset = query_offset;

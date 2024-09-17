@@ -46,7 +46,7 @@ void proxy_init(dns_proxy *restrict prx, dns_client *restrict clt,
  * @param dns_req Pointer to the DNS request packet.
  * @param dns_req_len Length of the DNS request packet.
  */
-void proxy_handle_request(dns_proxy *restrict prx, void *restrict data,
+void proxy_handle_request(void *restrict prx, void *restrict data,
                           const struct sockaddr *addr, const uint16_t tx_id,
                           char *restrict dns_req, const size_t dns_req_len);
 /**
@@ -63,7 +63,7 @@ void proxy_handle_request(dns_proxy *restrict prx, void *restrict data,
  * @param dns_res Pointer to the DNS response packet.
  * @param dns_res_len Length of the DNS response packet.
  */
-void proxy_handle_response(dns_proxy *restrict prx, void *restrict data,
+void proxy_handle_response(void *restrict prx, void *restrict data,
                            const struct sockaddr *addr, const uint16_t tx_id,
                            const char *restrict dns_res,
                            const size_t dns_res_len);
