@@ -9,7 +9,7 @@ OBJS = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 
 # Flags
 CC = gcc
-CFLAGS = -I./include -pedantic -std=gnu17 -O3 -flto -march=native  -mtune=native -Wno-incompatible-pointer-types 
+CFLAGS = -I./include -pedantic -std=gnu17 -O3 -flto -march=native  -mtune=native -fsanitize=address -g
 LDFLAGS =  -lev
 
 # Executable

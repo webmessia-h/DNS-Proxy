@@ -13,8 +13,12 @@ void options_init(struct options *opts) {
  * CORRESPONDING DEFINE'S IN THE ../include/config.h otherwise will cause
  * segmentation fault
  */
-const char *upstream_resolver[] = {"8.8.8.8", "8.8.4.4",
-                                   "9.9.9.9"}; //, "9.9.9.9"};
+const char *upstream_resolver[] = {
+    "8.8.8.8",
+    "8.8.4.4",
+    "9.9.9.9",
+}; // "1.1.1.1"};
+
 const char *BLACKLIST[] = {
     "youtube.com",
     "google.com",

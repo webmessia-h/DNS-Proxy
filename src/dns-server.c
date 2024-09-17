@@ -98,7 +98,8 @@ static void server_receive_request(struct ev_loop *loop, ev_io *obs,
             loop, obs, revents);
   dns_server *srv = (dns_server *)obs->data;
 
-  char buffer[REQUEST_AVG + 1] = {0};
+  char buffer[REQUEST_AVG + 1];
+  memset(buffer, 0, sizeof(buffer));
 
   struct sockaddr_storage raddr;
   socklen_t tmp_addrlen = srv->addrlen;

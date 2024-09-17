@@ -85,7 +85,7 @@ void proxy_stop(const dns_proxy *restrict prx) {
  */
 void proxy_handle_request(dns_proxy *restrict prx, void *restrict data,
                           const struct sockaddr *addr, const uint16_t tx_id,
-                          char *restrict dns_req, const size_t dns_req_len) {
+                          char *dns_req, const size_t dns_req_len) {
   LOG_TRACE("proxy_handle_request(prx ptr: %p, data ptr: %p, addr ptr: %p, "
             "tx_id: %u, "
             "dns_req ptr: %p, dns_req_len: %zu)\n",
@@ -120,12 +120,12 @@ void proxy_handle_response(dns_proxy *prx, void *data,
 
   transaction_info *current = find_transaction(tx_id);
   if (current != NULL) {
-    /*if (dns_res == NULL && dns_res_len == 0) {
+    if (dns_res == NULL && dns_res_len == 0) {
       // This is a timeout notification
       LOG_WARN("Request with tx_id %u timed out\n", tx_id);
       send_error_response(prx->server, &current->client_addr,
                           current->original_tx_id);
-    }*/
+    }
     server_send_response(prx->server, (struct sockaddr *)&current->client_addr,
                          dns_res, dns_res_len);
     delete_transaction(tx_id);
@@ -172,7 +172,7 @@ create_transaction_info(const struct sockaddr *clt, const uint16_t tx_id) {
   return tx_info;
 }
 
-static inline char *create_redirect_packet(char *restrict dns_req,
+static inline char *create_redirect_packet(char *dns_req,
                                            const size_t dns_req_len,
                                            const char *restrict domain) {
   LOG_TRACE("create_redirect_packet(dns_req ptr: %p, "
@@ -240,9 +240,9 @@ static inline void handle_redirect(dns_proxy *prx, struct sockaddr *addr,
 static inline void send_blacklisted_response(const dns_proxy *prx,
                                              const struct sockaddr *addr,
                                              const uint16_t tx_id,
-                                             const char *dns_req,
+                                             const char *restrict dns_req,
                                              const size_t dns_req_len) {
-  static char resp[RESPONSE_AVG];
+  char resp[RESPONSE_AVG];
 
   LOG_TRACE("send_blacklisted_response(prx ptr: %p, addr ptr: %p, tx_id: %u, "
             "dns_req ptr: %p, dns_req_len: %zu)\n",
@@ -260,7 +260,7 @@ static inline void send_blacklisted_response(const dns_proxy *prx,
          dns_req_len - sizeof(dns_header));
 
   server_send_response(prx->server, addr, resp, resp_len);
-  memset(resp, 0, dns_req_len);
+  // memset(resp, 0, dns_req_len);
 }
 #endif
 
@@ -282,7 +282,8 @@ static inline void send_error_response(const dns_server *restrict srv,
                                        const uint16_t tx_id) {
   LOG_TRACE("send_error_response(server ptr: %p, addr ptr: %p, tx_id %u)", srv,
             addr, tx_id);
-  char error_resp[sizeof(dns_header)] = {0};
+
+  char error_resp[RESPONSE_AVG];
   dns_header *header = (dns_header *)error_resp;
 
   memset(error_resp, 0, sizeof(dns_header));
@@ -291,5 +292,5 @@ static inline void send_error_response(const dns_server *restrict srv,
   header->qr = (uint8_t)1;           // This is a response
   header->rcode = (uint8_t)SERVFAIL; // Server failure
 
-  server_send_response(srv, addr, error_resp, sizeof(dns_header));
+  server_send_response(srv, addr, error_resp, sizeof(error_resp));
 }

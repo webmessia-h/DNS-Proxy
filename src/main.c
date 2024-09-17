@@ -56,6 +56,7 @@ int main(void) {
 
   LOG_INFO("DNS proxy started at %s:%d. Press Ctrl+C to stop.\n",
            opts.listen_addr, opts.listen_port);
+
   ev_run(loop, 0);
   ev_loop_destroy(loop);
 

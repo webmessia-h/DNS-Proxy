@@ -34,11 +34,11 @@ typedef enum {
 } rcode;      // DNS response codes
 
 enum {
-  REQUEST_AVG = 35,     // average DNS request packet size
+  REQUEST_AVG = 128,    // average DNS request packet size
   REQUEST_MAX = 512,    // reasonable for UDP
-  RESPONSE_AVG = 45,    // average response size is 40 bytes
+  RESPONSE_AVG = 128,   // average response size is 40 bytes
   RESPONSE_MAX = 512,   // reasonable for UDP
-  DOMAIN_AVG = 15,      // most of domain names are 7-15 characters long
+  DOMAIN_AVG = 50,      // most of domain names are 7-15 characters long
   DOMAIN_MAX = 253,     // will happen once in an eternity
   DNS_HEADER_SIZE = 12, // RFC
   DNS_CLASS_IN = 1,

@@ -11,7 +11,8 @@ static void client_receive_response(struct ev_loop *loop, ev_io *obs,
             loop, obs, revents);
   dns_client *client = (dns_client *)obs->data;
 
-  char buffer[REQUEST_AVG + 1] = {0};
+  char buffer[REQUEST_AVG + 1];
+  memset(buffer, 0, sizeof(buffer));
 
   struct sockaddr_storage saddr;
   socklen_t src_addrlen = sizeof(saddr);
@@ -120,11 +121,11 @@ void client_init(dns_client *restrict client, struct ev_loop *loop,
 
     client->resolvers[i].observer.data = client;
 
-    /* client->timeout_s = 3; // 3 seconds timeout
-     ev_timer_init(&client->timeout_observer, client_handle_timeout,
-                   *(&client->timeout_s), 0.);
-     client->timeout_observer.data = client;
-     ev_timer_start(client->loop, &client->timeout_observer);*/
+    client->timeout_s = 4; // 4 seconds timeout
+    LOG_DEBUG("Initializing timeout timer with value: %f\n", client->timeout_s);
+    ev_timer_init(&client->timeout_observer, client_handle_timeout,
+                  client->timeout_s, 0.);
+    LOG_DEBUG("Starting timeout timer\n");
 
     ev_io_start(client->loop, &client->resolvers[i].observer);
   }
@@ -138,6 +139,7 @@ void client_send_request(dns_client *restrict client,
   LOG_TRACE("client_send_request(client ptr: %p, dns_req ptr: %p, req_len: "
             "%zu, tx_id: %u)",
             client, dns_req, req_len, tx_id);
+
   if (sizeof(upstream_resolver) == 0) {
     LOG_ERROR("sizeof upstream_resolver == 0\n");
   }
@@ -149,8 +151,9 @@ void client_send_request(dns_client *restrict client,
   resolver *res = &client->resolvers[current_resolver];
 
   transaction_info *tx_info = find_transaction(tx_id);
-  /*if (tx_info)
-    tx_info->timestamp = time(NULL); // Record the send time*/
+
+  if (tx_info)
+    tx_info->timestamp = time(NULL); // Record the send time
 
   ssize_t sent = sendto(res->socket, dns_req, req_len, 0,
                         (struct sockaddr *)&res->addr, res->addrlen);
@@ -187,7 +190,6 @@ static inline void client_handle_timeout(struct ev_loop *loop, ev_timer *w,
   HASH_ITER(hh, client->transactions, entry, tmp) {
     if (difftime(current_time, entry->value->timestamp) > client->timeout_s) {
       LOG_WARN("Transaction %u timed out\n", entry->key);
-      LOG_DEBUG("tx_id: %u\n", entry->value->original_tx_id);
       // Notify the proxy about the timeout
       client->cb(client, client->cb_data, NULL, entry->key, NULL, 0);
 
