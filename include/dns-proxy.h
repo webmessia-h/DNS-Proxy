@@ -49,6 +49,7 @@ void proxy_init(dns_proxy *restrict prx, dns_client *restrict clt,
 void proxy_handle_request(void *restrict prx, void *restrict data,
                           const struct sockaddr *addr, const uint16_t tx_id,
                           char *restrict dns_req, const size_t dns_req_len);
+
 /**
  * @brief Handles a DNS response.
  *

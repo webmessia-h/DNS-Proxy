@@ -59,12 +59,27 @@ void client_init(dns_client *clt, struct ev_loop *loop, res_callback cb,
                  void *data, transaction_hash_entry *restrict transactions);
 
 /**
- * @brief Send a DNS request
+ * @brief Sends a DNS request to an upstream resolver.
  *
- * @param clt Pointer to the dns_client structure
- * @param dns_req Buffer containing the DNS request
- * @param req_len Length of the request buffer
- * @param tx_id Transaction ID for the request
+ * This function sends a DNS request to one of the upstream resolvers using a
+ * simple round-robin selection method. It also records the send time for the
+ * transaction if the transaction info is found.
+ *
+ * @param client Pointer to the dns_client structure.
+ * @param dns_req Pointer to the DNS request buffer.
+ * @param req_len Length of the DNS request.
+ * @param tx_id Transaction ID for the DNS request.
+ *
+ * @note This function uses the restrict keyword for pointers to indicate they
+ * don't alias.
+ *
+ * @warning This function assumes that the RESOLVERS macro and upstream_resolver
+ * variable are defined.
+ *
+ * @see dns_client
+ * @see resolver
+ * @see transaction_info
+ * @see find_transaction
  */
 void client_send_request(dns_client *clt, const char *dns_req,
                          const size_t req_len, const uint16_t tx_id);

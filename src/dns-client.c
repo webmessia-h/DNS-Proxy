@@ -5,6 +5,25 @@
 static void client_handle_timeout(struct ev_loop *loop, ev_timer *w,
                                   int revents);
 
+/**
+ * @brief Handles receiving DNS response for a client.
+ *
+ * This function is called when there's data available to be read from the
+ * client's socket. It receives the DNS response, performs basic validation, and
+ * invokes the client's callback with the received data.
+ *
+ * @param loop Pointer to the event loop.
+ * @param obs Pointer to the I/O watcher object.
+ * @param revents The received events that triggered this callback.
+ *
+ * @note This function is intended to be used as a callback for libev's I/O
+ * watchers.
+ *
+ * @warning This function assumes that the obs->data field contains a pointer to
+ * a dns_client struct.
+ *
+ * @see dns_client
+ */
 static void client_receive_response(struct ev_loop *loop, ev_io *obs,
                                     int revents) {
   LOG_TRACE("client_receive_response(loop ptr: %p, obs ptr: %p, revents: %d)",

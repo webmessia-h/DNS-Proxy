@@ -87,10 +87,9 @@ static inline int init_socket(const char *restrict listen_addr,
  * @param obs The I/O watcher object
  * @param revents The received events (unused in this function)
  *
- * @note This function allocates memory for the request buffer, which is freed
- * by the callback.
- * @warning The function returns early on errors, freeing the buffer if
- * necessary.
+ * @warning The function returns early on errors
+ * @see dns_server
+ *
  */
 static void server_receive_request(struct ev_loop *loop, ev_io *obs,
                                    int revents) {
@@ -192,6 +191,7 @@ bool parse_domain_name(const char *dns_req, const size_t dns_req_len,
   domain[domain_len] = '\0';
   return true;
 }
+
 void server_send_response(const dns_server *restrict srv,
                           const struct sockaddr *restrict raddr,
                           const char *restrict buffer, const size_t buflen) {

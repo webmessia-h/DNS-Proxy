@@ -1,7 +1,7 @@
 { pkgs ? import <nixpkgs> { } }:
 
 let
-  unstable = import (fetchTarball https://nixos.org/channels/nixos-unstable/nixexprs.tar.xz) { };  # Specify the desired GCC version
+  unstable = import (fetchTarball "https://nixos.org/channels/nixos-unstable/nixexprs.tar.xz") { };  # Specify the desired GCC version
   gcc = unstable.gcc14;
   # Specify the desired Clang version
   clang = unstable.clang_19;

@@ -108,9 +108,37 @@ void proxy_handle_request(void *restrict prx, void *restrict data,
   }
 }
 
-void proxy_handle_response(void *srv, void *data, const struct sockaddr *addr,
-                           const uint16_t tx_id, const char *dns_res,
-                           const size_t dns_res_len) {
+/**
+ * @brief Handles the DNS response received from an upstream resolver.
+ *
+ * This function processes the DNS response received from an upstream resolver.
+ * It looks up the original transaction, sends the response back to the client,
+ * and handles timeout scenarios.
+ *
+ * @param srv Pointer to the server object (unused in this function).
+ * @param data Pointer that to be casted to the dns_proxy structure.
+ * @param addr Pointer to the sockaddr structure containing the address of the
+ * upstream resolver.
+ * @param tx_id Transaction ID of the DNS response.
+ * @param dns_res Pointer to the buffer containing the DNS response.
+ * @param dns_res_len Length of the DNS response.
+ *
+ * @note If dns_res is NULL and dns_res_len is 0, it's treated as a timeout
+ * notification.
+ *
+ * @warning This function assumes that the data parameter is a pointer to a
+ * dns_proxy structure.
+ *
+ * @see dns_proxy
+ * @see transaction_info
+ * @see find_transaction
+ * @see send_error_response
+ * @see server_send_response
+ * @see delete_transaction
+ */
+void proxy_handle_response(void *restrict srv, void *data,
+                           const struct sockaddr *addr, const uint16_t tx_id,
+                           const char *dns_res, const size_t dns_res_len) {
   LOG_TRACE("proxy_handle_response(srv ptr: %p, data ptr: %p, addr ptr: %p, "
             "tx_id: %u, "
             "dns_res ptr: %p, dns_res_len: %zu)\n",
