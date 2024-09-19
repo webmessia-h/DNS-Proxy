@@ -8,10 +8,9 @@ SRCS = $(wildcard $(SRC_DIR)/*.c)
 OBJS = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 
 # Flags
-CC = gcc
+CC = clang
 CFLAGS = -Wall -I./include -std=gnu17 -O3 -march=native  -mtune=native 
-LDFLAGS =  -lev
-
+LDFLAGS =  -lev 
 # Executable
 TARGET = dns-proxy
 
