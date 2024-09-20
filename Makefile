@@ -1,18 +1,19 @@
 # Directories
-SRC_DIR = src
-OBJ_DIR = obj
-# Source files
-SRCS = $(wildcard $(SRC_DIR)/*.c)
+SRC_DIR := src
+OBJ_DIR := obj
 
+# Source files
+SRCS := $(wildcard $(SRC_DIR)/*.c)
 # Object files
-OBJS = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+OBJS := $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 
 # Flags
-CC = clang
-CFLAGS = -Wall -I./include -std=gnu17 -O3 -march=native  -mtune=native 
-LDFLAGS =  -lev 
+CC := clang
+CFLAGS := -Wall -fsanitize=address,undefined -I./include -std=gnu17 -O3 -march=native  -mtune=native 
+LDFLAGS :=  -lev -fsanitize=address,undefined
+
 # Executable
-TARGET = dns-proxy
+TARGET := dns-proxy
 
 # Default target
 all: $(TARGET)

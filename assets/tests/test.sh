@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 check_dnsperf() {
-    if ! command -v dnsperf &> /dev/null; then
+    if ! command -v dnsperf > /dev/null; then
         echo "dnsperf is not installed."
         echo "Please install dnsperf using your package manager."
         echo "On Debian/Ubuntu: sudo apt-get install dnsperf"
