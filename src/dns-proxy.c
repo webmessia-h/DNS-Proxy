@@ -65,7 +65,7 @@ void proxy_init(dns_proxy *prx, dns_client *clt, dns_server *srv,
   srv->cb = proxy_handle_request;
   srv->cb_data = prx;
 
-  clt->cb = proxy_handle_response;
+  clt->callback = proxy_handle_response;
   clt->cb_data = prx;
 }
 
@@ -93,7 +93,7 @@ void proxy_handle_request(void *restrict prx, void *restrict data,
   // WARN:
   prx = (dns_proxy *)data;
 
-  dns_header *header = (dns_header *)dns_req;
+  const dns_header *header = (dns_header *)dns_req;
   char domain[DOMAIN_AVG];
 
   if (!validate_request(header, tx_id, dns_req, dns_req_len, domain)) {
@@ -200,6 +200,7 @@ create_transaction_info(const struct sockaddr *clt, const uint16_t tx_id) {
   return tx_info;
 }
 
+#if REDIRECT == 1
 static inline char *create_redirect_packet(char *dns_req,
                                            const size_t dns_req_len,
                                            const char *restrict domain) {
@@ -207,7 +208,7 @@ static inline char *create_redirect_packet(char *dns_req,
             "dns_req_len: %zu, domain ptr: %p)",
             dns_req, dns_req_len, domain);
 
-  dns_header *header = (dns_header *)dns_req;
+  const dns_header *header = (dns_header *)dns_req;
   size_t query_offset = sizeof(*header);
 
   size_t redir_len = dns_req_len - (strlen(domain) + 2) + strlen(redirect_to);
@@ -231,6 +232,7 @@ static inline char *create_redirect_packet(char *dns_req,
          dns_req + query_offset + strlen(domain) + 2, rest_of_query_len);
   return redir;
 }
+#endif
 
 static inline void handle_blacklisted(const dns_proxy *prx,
                                       const struct sockaddr *addr,

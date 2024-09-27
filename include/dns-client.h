@@ -36,7 +36,7 @@ typedef struct {
 typedef struct dns_client {
   struct ev_loop *loop;          /**< Event loop */
   void *cb_data;                 /**< User-defined callback data */
-  res_callback cb;               /**< Response callback function */
+  res_callback callback;         /**< Response callback function */
   int sockfd;                    /**< Socket file descriptor */
   resolver resolvers[RESOLVERS]; /**< Array of DNS resolvers */
   transaction_hash_entry
@@ -55,7 +55,7 @@ typedef struct dns_client {
  * @param data User-defined callback data
  * @param transactions Pointer to the transactions hash table
  */
-void client_init(dns_client *clt, struct ev_loop *loop, res_callback cb,
+void client_init(dns_client *clt, struct ev_loop *loop, res_callback callback,
                  void *data, transaction_hash_entry *restrict transactions);
 
 /**

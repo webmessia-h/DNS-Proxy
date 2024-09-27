@@ -74,8 +74,8 @@ void proxy_handle_response(void *restrict prx, void *restrict data,
  *
  * Terminates the DNS proxy's operation and stops handling new requests.
  *
- * @param proxy Pointer to the dns_proxy structure to stop.
+ * @param prx Pointer to the dns_proxy structure to stop.
  */
-void proxy_stop(const dns_proxy *restrict proxy);
+void proxy_stop(const dns_proxy *restrict prx);
 
 #endif // DNS_PROXY

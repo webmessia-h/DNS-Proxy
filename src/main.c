@@ -1,5 +1,6 @@
 #include "config.h"
 #include "dns-proxy.h"
+#include "dns-server.h"
 #include "log.h"
 
 static struct ev_loop *loop;

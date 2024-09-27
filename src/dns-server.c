@@ -9,32 +9,32 @@ static inline int init_socket(const char *restrict listen_addr,
   LOG_TRACE("init_socket(listen_addr: %s, listen_port: %d, addrlen ptr: %p)\n",
             listen_addr, listen_port, addrlen);
 
-  struct addrinfo *ai = NULL;
+  struct addrinfo *addrinfo = NULL;
   struct addrinfo hints;
   bool ok = true;
   memset(&hints, 0, sizeof(struct addrinfo));
   // Prevent DNS lookups if leakage is our worry
   hints.ai_flags = AI_NUMERICHOST;
 
-  int res = getaddrinfo(listen_addr, NULL, &hints, &ai);
+  int res = getaddrinfo(listen_addr, NULL, &hints, &addrinfo);
   if (res != 0) {
     LOG_FATAL("Error parsing listen address %s:%d (getaddrinfo): %s\n",
               listen_addr, listen_port, strerror(res));
-    if (ai) {
-      freeaddrinfo(ai);
+    if (addrinfo) {
+      freeaddrinfo(addrinfo);
     }
     ok = false;
   }
 
-  struct sockaddr_in *saddr = (struct sockaddr_in *)ai->ai_addr;
+  struct sockaddr_in *saddr = (struct sockaddr_in *)addrinfo->ai_addr;
 
-  *addrlen = ai->ai_addrlen;
+  *addrlen = addrinfo->ai_addrlen;
   saddr->sin_port = htons(listen_port);
 
-  int sockfd = socket(ai->ai_family, SOCK_DGRAM, 0);
+  int sockfd = socket(addrinfo->ai_family, SOCK_DGRAM, 0);
   if (sockfd < 0) {
     LOG_FATAL("Error creating socket: %s", strerror(errno));
-    freeaddrinfo(ai);
+    freeaddrinfo(addrinfo);
     ok = false;
   }
 
@@ -42,7 +42,7 @@ static inline int init_socket(const char *restrict listen_addr,
   if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &opts, sizeof(opts)) < 0) {
     LOG_ERROR("setsockopt(SO_REUSEADDR) failed: %s", strerror(errno));
     close(sockfd);
-    freeaddrinfo(ai);
+    freeaddrinfo(addrinfo);
     return -1;
   }
 
@@ -59,16 +59,16 @@ static inline int init_socket(const char *restrict listen_addr,
     LOG_ERROR("setsockopt(SO_SNDBUF) failed: %s", strerror(errno));
   }
 
-  res = bind(sockfd, ai->ai_addr, ai->ai_addrlen);
+  res = bind(sockfd, addrinfo->ai_addr, addrinfo->ai_addrlen);
   if (res < 0) {
     LOG_FATAL("Error binding socket %s:%du: %s (%d)\n", listen_addr,
               listen_port, strerror(errno), res);
     close(sockfd);
-    freeaddrinfo(ai);
+    freeaddrinfo(addrinfo);
     ok = false;
   }
 
-  freeaddrinfo(ai);
+  freeaddrinfo(addrinfo);
 
   if (!ok)
     exit(-1);
@@ -120,13 +120,13 @@ static void server_receive_request(struct ev_loop *loop, ev_io *obs,
 }
 
 void server_init(dns_server *restrict srv, struct ev_loop *loop,
-                 req_callback cb, const char *restrict listen_addr,
+                 req_callback callback, const char *restrict listen_addr,
                  const uint16_t listen_port, void *restrict data,
                  const hash_entry *restrict blacklist) {
-  LOG_TRACE(
-      "server_init(srv ptr: %p, loop ptr: %p, cb ptr: %p, listen_addr: %s, "
-      "listen_port: %d, data ptr: %p, blacklist ptr: %p)\n",
-      srv, loop, cb, listen_addr, listen_port, data, blacklist);
+  LOG_TRACE("server_init(srv ptr: %p, loop ptr: %p, callback ptr: %p, "
+            "listen_addr: %s, "
+            "listen_port: %d, data ptr: %p, blacklist ptr: %p)\n",
+            srv, loop, callback, listen_addr, listen_port, data, blacklist);
 
   srv->loop = loop;
   srv->sockfd = init_socket(listen_addr, listen_port, &srv->addrlen);
@@ -134,7 +134,7 @@ void server_init(dns_server *restrict srv, struct ev_loop *loop,
     LOG_FATAL("Failed to initialize socket\n");
     return;
   }
-  srv->cb = cb;
+  srv->cb = callback;
   srv->cb_data = data;
   srv->blacklist = blacklist;
 
@@ -145,8 +145,9 @@ void server_init(dns_server *restrict srv, struct ev_loop *loop,
 
 bool is_blacklisted(const char *domain) {
   LOG_TRACE("is_blacklisted(domain ptr: %p)", domain);
-  if (find(domain) == 1)
+  if (find(domain) == 1) {
     return true;
+  }
 
   return false;
 }
@@ -163,8 +164,9 @@ bool parse_domain_name(const char *dns_req, const size_t dns_req_len,
   while (pos < dns_req_len) {
     uint8_t label_len = (uint8_t)dns_req[pos];
 
-    if (label_len == 0)
+    if (label_len == 0) {
       break; // End of domain name
+    }
 
     if ((label_len & 0xC0) == 0xC0) {
       // Handle compression (jump to offset)
@@ -174,14 +176,17 @@ bool parse_domain_name(const char *dns_req, const size_t dns_req_len,
       continue;
     }
 
-    if (pos + label_len + 1 > dns_req_len)
+    if (pos + label_len + 1 > dns_req_len) {
       return false;
+    }
 
-    if (domain_len + label_len + 1 > domain_max_len)
+    if (domain_len + label_len + 1 > domain_max_len) {
       return false;
+    }
 
-    if (domain_len > 0)
+    if (domain_len > 0) {
       domain[domain_len++] = '.';
+    }
 
     memcpy(domain + domain_len, dns_req + pos + 1, label_len);
     domain_len += label_len;

@@ -10,10 +10,11 @@ void log_set_level(log_lvl level) { current_log_level = level; }
 
 void log_message(log_lvl level, const char *file, int line, const char *format,
                  ...) {
-  if (level > current_log_level)
+  if (level > current_log_level) {
     return;
+  }
 
-  time_t now;
+  time_t now = 0;
   time(&now);
   char *date = ctime(&now);
   date[strlen(date) - 1] = '\0'; // Remove newline
