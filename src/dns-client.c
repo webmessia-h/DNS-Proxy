@@ -29,7 +29,8 @@ static void client_receive_response(struct ev_loop *loop, ev_io *obs,
                                     int revents) {
   LOG_TRACE("client_receive_response(loop ptr: %p, obs ptr: %p, revents: %d)",
             loop, obs, revents);
-  dns_client *client = (dns_client *)obs->data;
+  struct dns_client *clt = NULL;
+  clt = (struct dns_client *)obs->data;
 
   char buffer[REQUEST_AVG + 1];
   memset(buffer, 0, sizeof(buffer));
@@ -50,11 +51,11 @@ static void client_receive_response(struct ev_loop *loop, ev_io *obs,
   }
 
   uint16_t tx_id = ntohs(*((uint16_t *)buffer));
-  client->callback((void *)client, client->cb_data, (struct sockaddr *)&saddr,
-                   tx_id, buffer, len);
+  clt->callback((void *)clt, clt->cb_data, (struct sockaddr *)&saddr, tx_id,
+                buffer, len);
 }
 
-void client_init(dns_client *restrict clt, struct ev_loop *loop,
+void client_init(struct dns_client *restrict clt, struct ev_loop *loop,
                  res_callback callback, void *restrict data,
                  transaction_hash_entry *restrict transactions) {
   LOG_TRACE(
@@ -151,12 +152,12 @@ void client_init(dns_client *restrict clt, struct ev_loop *loop,
   }
 }
 
-void client_send_request(dns_client *restrict client,
+void client_send_request(struct dns_client *restrict clt,
                          const char *restrict dns_req, const size_t req_len,
                          const uint16_t tx_id) {
   LOG_TRACE("client_send_request(client ptr: %p, dns_req ptr: %p, req_len: "
             "%zu, tx_id: %u)",
-            client, dns_req, req_len, tx_id);
+            clt, dns_req, req_len, tx_id);
 
   if (sizeof(upstream_resolver) == 0) {
     LOG_ERROR("sizeof upstream_resolver == 0\n");
@@ -166,7 +167,7 @@ void client_send_request(dns_client *restrict client,
   static int current_resolver = 0;
   current_resolver = (current_resolver + 1) % RESOLVERS;
 
-  resolver *res = &client->resolvers[current_resolver];
+  struct resolver *res = &clt->resolvers[current_resolver];
 
   transaction_info *tx_info = find_transaction(tx_id);
 
@@ -199,7 +200,8 @@ void client_send_request(dns_client *restrict client,
 
 static inline void client_handle_timeout(struct ev_loop *loop,
                                          ev_timer *watcher, int revents) {
-  dns_client *client = (dns_client *)watcher->data;
+  struct dns_client *clt = NULL;
+  clt = (struct dns_client *)watcher->data;
   LOG_TRACE("client_handle_timeout(loop ptr: %p, w ptr: %p, revents: %d)\n",
             loop, watcher, revents);
 
@@ -207,11 +209,11 @@ static inline void client_handle_timeout(struct ev_loop *loop,
   transaction_hash_entry *entry = NULL;
   transaction_hash_entry *tmp = NULL;
 
-  HASH_ITER(hh, client->transactions, entry, tmp) {
-    if (difftime(current_time, entry->value->timestamp) > client->timeout_s) {
+  HASH_ITER(hh, clt->transactions, entry, tmp) {
+    if (difftime(current_time, entry->value->timestamp) > clt->timeout_s) {
       LOG_WARN("Transaction %u timed out\n", entry->key);
       // Notify the proxy about the timeout
-      client->callback(client, client->cb_data, NULL, entry->key, NULL, 0);
+      clt->callback(clt, clt->cb_data, NULL, entry->key, NULL, 0);
 
       // Remove the timed-out transaction
       delete_transaction(entry->value->original_tx_id);
@@ -222,7 +224,7 @@ static inline void client_handle_timeout(struct ev_loop *loop,
   ev_timer_again(loop, watcher);
 }
 
-void client_cleanup(dns_client *restrict clt) {
+void client_cleanup(struct dns_client *restrict clt) {
   LOG_TRACE("client_cleanup(client ptr: %p)\n", clt);
   for (int i = 0; i < RESOLVERS; i++) {
     ev_io_stop(clt->loop, &clt->resolvers[i].observer);

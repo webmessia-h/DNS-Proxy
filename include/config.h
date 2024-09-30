@@ -20,7 +20,7 @@ extern const char *redirect_to;
 
 extern const uint8_t BLACKLISTED_RESPONSE;
 
-typedef enum {
+enum {
   NOERROR = 0,  // all good
   FORMERR = 1,  // format error
   SERVFAIL = 2, // server failure
@@ -31,7 +31,7 @@ typedef enum {
   XRRSET = 7,
   NOTAUTH = 8,
   NOTZONE = 9 // not in responsibility zone
-} rcode;      // DNS response codes
+}; // DNS response codes
 
 enum {
   REQUEST_AVG = 128,    // average DNS request packet size
@@ -44,13 +44,13 @@ enum {
   DNS_CLASS_IN = 1,
 }; // networking constants
 
-typedef struct options {
+struct options {
   const char *listen_addr;
   uint16_t listen_port;
   uint16_t fallback_port;
   uint8_t BLACKLISTED_RESPONSE;
   uint8_t log_level;
-} options;
+};
 
 void options_init(struct options *opt);
 

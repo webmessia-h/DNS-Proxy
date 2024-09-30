@@ -1,12 +1,11 @@
 #include "config.h"
 #include "dns-proxy.h"
-#include "dns-server.h"
 #include "log.h"
 
 static struct ev_loop *loop;
-static dns_server server;
-static dns_client client;
-static dns_proxy proxy;
+static struct dns_server server;
+static struct dns_client client;
+static struct dns_proxy proxy;
 static struct options opts;
 hash_entry *blacklist = NULL;
 transaction_hash_entry *transactions = NULL;

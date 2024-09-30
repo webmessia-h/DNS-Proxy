@@ -70,8 +70,9 @@ static inline int init_socket(const char *restrict listen_addr,
 
   freeaddrinfo(addrinfo);
 
-  if (!ok)
+  if (!ok) {
     exit(-1);
+  }
   LOG_TRACE("Listening on %s:%d\n", listen_addr, listen_port);
   return sockfd;
 }
@@ -95,7 +96,8 @@ static void server_receive_request(struct ev_loop *loop, ev_io *obs,
                                    int revents) {
   LOG_TRACE("server_receive_request(loop ptr: %p, obs ptr: %p, revents: %d)",
             loop, obs, revents);
-  dns_server *srv = (dns_server *)obs->data;
+  struct dns_server *srv = NULL;
+  srv = (struct dns_server *)obs->data;
 
   char buffer[REQUEST_AVG + 1];
   memset(buffer, 0, sizeof(buffer));
@@ -119,7 +121,7 @@ static void server_receive_request(struct ev_loop *loop, ev_io *obs,
           len);
 }
 
-void server_init(dns_server *restrict srv, struct ev_loop *loop,
+void server_init(struct dns_server *restrict srv, struct ev_loop *loop,
                  req_callback callback, const char *restrict listen_addr,
                  const uint16_t listen_port, void *restrict data,
                  const hash_entry *restrict blacklist) {
@@ -197,7 +199,7 @@ bool parse_domain_name(const char *dns_req, const size_t dns_req_len,
   return true;
 }
 
-void server_send_response(const dns_server *restrict srv,
+void server_send_response(const struct dns_server *restrict srv,
                           const struct sockaddr *restrict raddr,
                           const char *restrict buffer, const size_t buflen) {
   LOG_TRACE("server_send_response(srv ptr: %p, raddr ptr: %p, buffer ptr: %p, "
@@ -209,12 +211,12 @@ void server_send_response(const dns_server *restrict srv,
   }
 }
 
-void server_stop(dns_server *restrict srv) {
+void server_stop(struct dns_server *restrict srv) {
   LOG_TRACE("server_stop(srv ptr: %p)", srv);
   ev_io_stop(srv->loop, &srv->observer);
 }
 
-void server_cleanup(const dns_server *restrict srv) {
+void server_cleanup(const struct dns_server *restrict srv) {
   LOG_TRACE("server_cleanup(srv ptr: %p)", srv);
   close(srv->sockfd);
 }

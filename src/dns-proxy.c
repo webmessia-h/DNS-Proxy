@@ -2,27 +2,28 @@
 #include "config.h" /* Main configuration file */
 #include "log.h"
 
-inline void proxy_init(dns_proxy *restrict prx, dns_client *restrict clt,
-                       dns_server *restrict srv, struct ev_loop *loop);
+inline void proxy_init(struct dns_proxy *restrict prx,
+                       struct dns_client *restrict clt,
+                       struct dns_server *restrict srv, struct ev_loop *loop);
 
-void proxy_stop(const dns_proxy *restrict prx);
+void proxy_stop(const struct dns_proxy *restrict prx);
 
 void proxy_handle_request(void *restrict prx, void *restrict data,
                           const struct sockaddr *addr, const uint16_t tx_id,
                           char *restrict dns_req, const size_t dns_req_len);
 
 static inline void
-handle_blacklisted(const dns_proxy *prx, const struct sockaddr *addr,
+handle_blacklisted(const struct dns_proxy *prx, const struct sockaddr *addr,
                    const uint16_t tx_id, char *restrict dns_req,
                    const size_t dns_req_len, const char *restrict domain);
 
-static inline void send_blacklisted_response(const dns_proxy *prx,
+static inline void send_blacklisted_response(const struct dns_proxy *prx,
                                              const struct sockaddr *addr,
                                              const uint16_t tx_id,
                                              const char *dns_req,
                                              const size_t dns_req_len);
 
-static inline void forward_request(const dns_proxy *prx,
+static inline void forward_request(const struct dns_proxy *prx,
                                    const struct sockaddr *addr,
                                    const uint16_t tx_id, const char *dns_req,
                                    const size_t dns_req_len);
@@ -32,11 +33,11 @@ void proxy_handle_response(void *restrict prx, void *restrict data,
                            const char *restrict dns_res,
                            const size_t dns_res_len);
 
-static inline void send_error_response(const dns_server *restrict srv,
+static inline void send_error_response(const struct dns_server *restrict srv,
                                        const struct sockaddr *restrict addr,
                                        const uint16_t tx_id);
 
-static inline bool validate_request(const dns_header *restrict header,
+static inline bool validate_request(const struct dns_header *restrict header,
                                     const uint16_t tx_id,
                                     const char *restrict dns_req,
                                     const size_t dns_req_len,
@@ -51,8 +52,8 @@ static inline char *create_redirect_packet(char *restrict dns_req,
 /*---*/
 // IMPLEMENTATION
 
-void proxy_init(dns_proxy *prx, dns_client *clt, dns_server *srv,
-                struct ev_loop *loop) {
+void proxy_init(struct dns_proxy *prx, struct dns_client *clt,
+                struct dns_server *srv, struct ev_loop *loop) {
   LOG_TRACE("proxy_init(prx ptr: %p, clt ptr: %p, srv ptr: %p, loop ptr: %p)\n",
             prx, clt, srv, loop);
   prx->client = clt;
@@ -69,7 +70,7 @@ void proxy_init(dns_proxy *prx, dns_client *clt, dns_server *srv,
   clt->cb_data = prx;
 }
 
-void proxy_stop(const dns_proxy *restrict prx) {
+void proxy_stop(const struct dns_proxy *restrict prx) {
   LOG_TRACE("proxy_stop(prx ptr: %p)\n", prx);
   ev_break(prx->loop, EVBREAK_ALL);
 }
@@ -91,9 +92,9 @@ void proxy_handle_request(void *restrict prx, void *restrict data,
             "dns_req ptr: %p, dns_req_len: %zu)\n",
             prx, data, addr, tx_id, dns_req, dns_req_len);
   // WARN:
-  prx = (dns_proxy *)data;
+  prx = (struct dns_proxy *)data;
 
-  const dns_header *header = (dns_header *)dns_req;
+  const struct dns_header *header = (struct dns_header *)dns_req;
   char domain[DOMAIN_AVG];
 
   if (!validate_request(header, tx_id, dns_req, dns_req_len, domain)) {
@@ -144,7 +145,7 @@ void proxy_handle_response(void *restrict srv, void *data,
             "dns_res ptr: %p, dns_res_len: %zu)\n",
             data, data, addr, tx_id, dns_res, dns_res_len);
   // WARN:
-  dns_proxy *prx = (dns_proxy *)data;
+  struct dns_proxy *prx = (struct dns_proxy *)data;
 
   transaction_info *current = find_transaction(tx_id);
   if (current != NULL) {
@@ -162,7 +163,7 @@ void proxy_handle_response(void *restrict srv, void *data,
   }
 }
 
-static inline bool validate_request(const dns_header *header,
+static inline bool validate_request(const struct dns_header *header,
                                     const uint16_t tx_id, const char *dns_req,
                                     const size_t dns_req_len, char *domain) {
   LOG_TRACE("validate_request(header ptr: %p, tx_id: %u, dns_req ptr: %p, "
@@ -234,7 +235,7 @@ static inline char *create_redirect_packet(char *dns_req,
 }
 #endif
 
-static inline void handle_blacklisted(const dns_proxy *prx,
+static inline void handle_blacklisted(const struct dns_proxy *prx,
                                       const struct sockaddr *addr,
                                       const uint16_t tx_id, char *dns_req,
                                       const size_t dns_req_len,
@@ -250,7 +251,7 @@ static inline void handle_blacklisted(const dns_proxy *prx,
 }
 
 #if REDIRECT == 1
-static inline void handle_redirect(dns_proxy *prx, struct sockaddr *addr,
+static inline void handle_redirect(struct dns_proxy *prx, struct sockaddr *addr,
                                    uint16_t tx_id, char *dns_req,
                                    size_t dns_req_len, const char *domain) {
   LOG_TRACE("handle_redirect(prx ptr: %p, addr ptr: %p, tx_id: %u, "
@@ -266,7 +267,7 @@ static inline void handle_redirect(dns_proxy *prx, struct sockaddr *addr,
   free(redir);
 }
 #else
-static inline void send_blacklisted_response(const dns_proxy *prx,
+static inline void send_blacklisted_response(const struct dns_proxy *prx,
                                              const struct sockaddr *addr,
                                              const uint16_t tx_id,
                                              const char *restrict dns_req,
@@ -277,23 +278,24 @@ static inline void send_blacklisted_response(const dns_proxy *prx,
             "dns_req ptr: %p, dns_req_len: %zu)\n",
             prx, addr, tx_id, dns_req, dns_req_len);
 
-  memcpy(resp, dns_req, sizeof(dns_header));
-  dns_header *resp_header = (dns_header *)resp;
+  memcpy(resp, dns_req, sizeof(struct dns_header));
+  struct dns_header *resp_header = (struct dns_header *)resp;
 
   resp_header->rcode = BLACKLISTED_RESPONSE;
   resp_header->qr = 1;
   resp_header->rd = 0;
 
-  size_t resp_len = sizeof(dns_header) + (dns_req_len - sizeof(dns_header));
-  memcpy(resp + sizeof(dns_header), dns_req + sizeof(dns_header),
-         dns_req_len - sizeof(dns_header));
+  size_t resp_len =
+      sizeof(struct dns_header) + (dns_req_len - sizeof(struct dns_header));
+  memcpy(resp + sizeof(struct dns_header), dns_req + sizeof(struct dns_header),
+         dns_req_len - sizeof(struct dns_header));
 
   server_send_response(prx->server, addr, resp, resp_len);
   // memset(resp, 0, dns_req_len);
 }
 #endif
 
-static inline void forward_request(const dns_proxy *restrict prx,
+static inline void forward_request(const struct dns_proxy *restrict prx,
                                    const struct sockaddr *addr,
                                    const uint16_t tx_id,
                                    const char *restrict dns_req,
@@ -306,16 +308,16 @@ static inline void forward_request(const dns_proxy *restrict prx,
   client_send_request(prx->client, dns_req, dns_req_len, tx_id);
 }
 
-static inline void send_error_response(const dns_server *restrict srv,
+static inline void send_error_response(const struct dns_server *restrict srv,
                                        const struct sockaddr *restrict addr,
                                        const uint16_t tx_id) {
   LOG_TRACE("send_error_response(server ptr: %p, addr ptr: %p, tx_id %u)", srv,
             addr, tx_id);
 
   char error_resp[RESPONSE_AVG];
-  dns_header *header = (dns_header *)error_resp;
+  struct dns_header *header = (struct dns_header *)error_resp;
 
-  memset(error_resp, 0, sizeof(dns_header));
+  memset(error_resp, 0, sizeof(struct dns_header));
 
   header->id = tx_id;
   header->qr = (uint8_t)1;           // This is a response

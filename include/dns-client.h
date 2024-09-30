@@ -23,28 +23,28 @@ typedef void (*res_callback)(void *clt, void *data, const struct sockaddr *addr,
 /**
  * @brief Structure representing a DNS resolver
  */
-typedef struct {
+struct resolver {
   struct sockaddr_storage addr; /**< Address of the resolver */
   socklen_t addrlen;            /**< Length of the resolver's address */
   int socket;                   /**< Socket file descriptor */
   ev_io observer;               /**< Event loop I/O watcher */
-} resolver;
+};
 
 /**
  * @brief Structure representing a DNS client
  */
-typedef struct dns_client {
-  struct ev_loop *loop;          /**< Event loop */
-  void *cb_data;                 /**< User-defined callback data */
-  res_callback callback;         /**< Response callback function */
-  int sockfd;                    /**< Socket file descriptor */
-  resolver resolvers[RESOLVERS]; /**< Array of DNS resolvers */
+struct dns_client {
+  struct ev_loop *loop;                 /**< Event loop */
+  void *cb_data;                        /**< User-defined callback data */
+  res_callback callback;                /**< Response callback function */
+  int sockfd;                           /**< Socket file descriptor */
+  struct resolver resolvers[RESOLVERS]; /**< Array of DNS resolvers */
   transaction_hash_entry
       *transactions;         /**< Hash table of ongoing transactions */
   ev_io observer;            /**< Event loop I/O watcher */
   ev_timer timeout_observer; /**< Event loop timer for timeouts */
   double timeout_s;          /**< Timeout in seconds */
-} dns_client;
+};
 
 /**
  * @brief Initialize a DNS client
@@ -55,8 +55,9 @@ typedef struct dns_client {
  * @param data User-defined callback data
  * @param transactions Pointer to the transactions hash table
  */
-void client_init(dns_client *clt, struct ev_loop *loop, res_callback callback,
-                 void *data, transaction_hash_entry *restrict transactions);
+void client_init(struct dns_client *clt, struct ev_loop *loop,
+                 res_callback callback, void *data,
+                 transaction_hash_entry *restrict transactions);
 
 /**
  * @brief Sends a DNS request to an upstream resolver.
@@ -81,7 +82,7 @@ void client_init(dns_client *clt, struct ev_loop *loop, res_callback callback,
  * @see transaction_info
  * @see find_transaction
  */
-void client_send_request(dns_client *clt, const char *dns_req,
+void client_send_request(struct dns_client *clt, const char *dns_req,
                          const size_t req_len, const uint16_t tx_id);
 
 /**
@@ -89,6 +90,6 @@ void client_send_request(dns_client *clt, const char *dns_req,
  *
  * @param clt Pointer to the dns_client structure to clean up
  */
-void client_cleanup(dns_client *restrict clt);
+void client_cleanup(struct dns_client *restrict clt);
 
 #endif // DNS_CLIENT

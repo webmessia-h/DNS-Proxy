@@ -8,7 +8,7 @@
 /**
  * @brief DNS header structure
  */
-typedef struct {
+struct dns_header {
   uint16_t id;         /**< Identification number */
   uint8_t rd : 1;      /**< Recursion Desired */
   uint8_t tc : 1;      /**< Truncated Message */
@@ -22,15 +22,15 @@ typedef struct {
   uint16_t ans_count;  /**< Number of answer entries */
   uint16_t auth_count; /**< Number of authority entries */
   uint16_t add_count;  /**< Number of resource entries */
-} dns_header;
+};
 /**
  * @brief DNS question structure
  */
-typedef struct {
+struct dns_question {
   char *qname;     /**< Domain name */
   uint16_t qtype;  /**< Query type */
   uint16_t qclass; /**< Query class */
-} dns_question;
+};
 #pragma pack(pop)
 
 struct dns_server;
@@ -45,7 +45,7 @@ typedef void (*req_callback)(void *restrict srv, void *restrict data,
 /**
  * @brief DNS server structure
  */
-typedef struct dns_server {
+struct dns_server {
   struct ev_loop *loop;        /**< Event loop */
   void *cb_data;               /**< Additional data for callback */
   req_callback cb;             /**< Callback function */
@@ -53,23 +53,23 @@ typedef struct dns_server {
   socklen_t addrlen;           /**< Address length */
   ev_io observer;              /**< Event loop observer */
   const hash_entry *blacklist; /**< Blacklist */
-} dns_server;
+};
 
 /**
  * @brief Initialize the DNS server
  * @param srv Pointer to dns_server struct
  * @param loop Event loop
- * @param cb Callback function for requests
+ * @param callback Callback function for requests
  * @param listen_addr Listen address
  * @param listen_port Listen port
  * @param fallback_port Fallback port
  * @param data User-defined data
- * @param map Blacklist hash map
+ * @param blacklist Blacklist hash map
  */
-void server_init(dns_server *restrict srv, struct ev_loop *loop,
-                 req_callback cb, const char *restrict listen_addr,
+void server_init(struct dns_server *restrict srv, struct ev_loop *loop,
+                 req_callback callback, const char *restrict listen_addr,
                  const uint16_t listen_port, void *restrict data,
-                 const hash_entry *restrict map);
+                 const hash_entry *restrict blacklist);
 
 /**
  * @brief Check if a domain is blacklisted
@@ -98,7 +98,7 @@ bool parse_domain_name(const char *restrict dns_req, const size_t dns_req_len,
  * @param buffer Response buffer
  * @param buflen Length of response buffer
  */
-void server_send_response(const dns_server *restrict srv,
+void server_send_response(const struct dns_server *restrict srv,
                           const struct sockaddr *raddr,
                           const char *restrict buffer, const size_t buflen);
 
@@ -106,12 +106,12 @@ void server_send_response(const dns_server *restrict srv,
  * @brief Stop the event loop
  * @param srv Pointer to dns_server struct
  */
-void server_stop(dns_server *restrict srv);
+void server_stop(struct dns_server *restrict srv);
 
 /**
  * @brief Clean up server resources
  * @param srv Pointer to dns_server struct
  */
-void server_cleanup(const dns_server *restrict srv);
+void server_cleanup(const struct dns_server *restrict srv);
 
 #endif // SERVER_H

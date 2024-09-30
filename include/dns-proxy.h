@@ -10,11 +10,11 @@
  *
  * Contains the event loop, client, server, and timeout configuration.
  */
-typedef struct dns_proxy {
-  struct ev_loop *loop; /**< Event loop used by the proxy. */
-  dns_client *client;   /**< Pointer to the DNS client. */
-  dns_server *server;   /**< Pointer to the DNS server. */
-} dns_proxy;
+struct dns_proxy {
+  struct ev_loop *loop;      /**< Event loop used by the proxy. */
+  struct dns_client *client; /**< Pointer to the DNS client. */
+  struct dns_server *server; /**< Pointer to the DNS server. */
+};
 
 /**
  * @brief Initializes a DNS proxy.
@@ -28,8 +28,8 @@ typedef struct dns_proxy {
  * @param srv Pointer to the initialized dns_server structure.
  * @param loop Pointer to the libev event loop (ev_loop) structure.
  */
-void proxy_init(dns_proxy *restrict prx, dns_client *restrict clt,
-                dns_server *restrict srv, struct ev_loop *loop);
+void proxy_init(struct dns_proxy *restrict prx, struct dns_client *restrict clt,
+                struct dns_server *restrict srv, struct ev_loop *loop);
 
 /**
  * @brief Handles a DNS request.
@@ -76,6 +76,6 @@ void proxy_handle_response(void *restrict prx, void *restrict data,
  *
  * @param prx Pointer to the dns_proxy structure to stop.
  */
-void proxy_stop(const dns_proxy *restrict prx);
+void proxy_stop(const struct dns_proxy *restrict prx);
 
 #endif // DNS_PROXY
