@@ -1,3 +1,18 @@
+//  ────────────────────── DNS-Proxy ────────────────────────
+// ┌─────────────────────────────────────────────────────────┐
+// │ Author: Danylo Volchenko, danylo.volchenko@gmail.com    │
+// │                                                         │
+// │ Date: Aug. 2024                                         │
+// │ License: GPLv3+                                         │
+// │                                                         │
+// │ Description: Started as a technical task,               │
+// │ DNS-Proxy is an evolving project that aims to handle    │
+// │ DNS requests efficiently and may develop further,       │
+// │ feel free to contribute, as this project lacks second   │
+// │ pair of eyes.                                           │
+// └─────────────────────────────────────────────────────────┘
+//
+
 #include "config.h"
 #include "dns-proxy.h"
 #include "log.h"
